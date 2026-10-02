@@ -573,38 +573,55 @@
   </div>
 
   <!-- WINVER.EXE ABOUT US WINDOW -->
-  <div class="winver-window hidden" id="winver-window">
-    <div class="app-titlebar" id="winver-titlebar">
-      <div class="app-title"><img class="mini-logo" src="custom-logo.png" alt=""><span>About Windows - APBn Squad</span></div>
-      <div class="window-buttons">
-        <button type="button" class="btn-min" id="winver-min" title="Minimize">_</button>
-        <button type="button" class="close btn-close" id="winver-close" title="Close">×</button>
+<div class="space-y-3">
+  <h3 class="text-sm font-bold text-[#1e293b]">Developers & Contributors:</h3>
+
+  <div class="flex flex-wrap gap-4">
+    <!-- Saimon Islam Prantik Card -->
+    <a 
+      href="https://github.com/SaimonIslamPrantik/" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      class="flex flex-col items-center p-6 bg-[#f4f8ff] rounded-xl border border-[#dbeafe] shadow-sm hover:shadow-md hover:border-[#bfdbfe] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer w-56 text-center group"
+    >
+      <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-[#93c5fd] shadow-inner mb-3">
+        <img 
+          src="YOUR_IMAGE_URL_HERE" 
+          alt="Saimon Islam Prantik" 
+          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+        />
       </div>
-    </div>
-    <div class="winver-body">
-      <div class="winver-banner">
-        <div class="winver-title">APBn Squad Message Portal</div>
-        <div style="color:#555">Version 2.0 (OS Build 10240)</div>
-        <div style="color:#555;margin-top:2px">Copyright © APBn Squad. All rights reserved.</div>
+      <h4 class="font-bold text-[#0f172a] text-base mb-1 group-hover:text-[#1d4ed8] transition-colors">
+        Saimon Islam Prantik
+      </h4>
+      <p class="text-xs font-semibold text-[#475569]">
+        Frontend + UI UX
+      </p>
+    </a>
+
+    <!-- Fahad Al Belal Card -->
+    <a 
+      href="https://github.com/fahad09belal/" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      class="flex flex-col items-center p-6 bg-[#f4f8ff] rounded-xl border border-[#dbeafe] shadow-sm hover:shadow-md hover:border-[#bfdbfe] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer w-56 text-center group"
+    >
+      <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-[#93c5fd] shadow-inner mb-3">
+        <img 
+          src="YOUR_IMAGE_URL_HERE" 
+          alt="Fahad Al Belal" 
+          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+        />
       </div>
-      <div style="font-weight:bold;color:#1d426c;margin-bottom:8px">Developers & Contributors:</div>
-      <div class="winver-columns">
-        <div class="dev-card">
-          <img class="dev-avatar" src="https://avatars.githubusercontent.com/u/82695288?v=4" alt="Saimon Islam Prantik">
-          <div class="dev-name">Saimon Islam Prantik</div>
-          <div class="dev-role">Frontend + UI UX</div>
-        </div>
-        <div class="dev-card">
-          <img class="dev-avatar" src="https://plain-apac-prod-public.komododecks.com/202610/02/syk9mHptyDtIfrb0ffVb/image.jpg" alt="Fahad Al Belal">
-          <div class="dev-name">Fahad Al Belal</div>
-          <div class="dev-role">Backend + Frontend</div>
-        </div>
-      </div>
-      <div class="winver-footer">
-        <button class="btn" id="winver-ok-btn" style="min-width:75px">OK</button>
-      </div>
-    </div>
+      <h4 class="font-bold text-[#0f172a] text-base mb-1 group-hover:text-[#1d4ed8] transition-colors">
+        Fahad Al Belal
+      </h4>
+      <p class="text-xs font-semibold text-[#475569]">
+        Backend + Frontend
+      </p>
+    </a>
   </div>
+</div>
 
   <!-- SINGLE REUSABLE FLOATING POPOVER CARD -->
   <div class="profile-popover" id="profile-popover">
@@ -762,7 +779,7 @@
     if (!winverTaskbarItem) {
       winverTaskbarItem = document.createElement("div");
       winverTaskbarItem.className = "taskbar-item active";
-      winverTaskbarItem.title = "About Windows - APBn Squad";
+      winverTaskbarItem.title = "about_us.exe";
       winverTaskbarItem.innerHTML = `<img src="custom-logo.png" alt=""><span>About Windows</span>`;
       winverTaskbarItem.onclick = toggleMinimizeWinver;
       $("taskbar-items-container").appendChild(winverTaskbarItem);
