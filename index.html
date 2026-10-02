@@ -804,11 +804,14 @@
   const usernameRegex = /^[A-Za-z]+@[0-9]+$/;
 
   // Audio Synthesizer Beep
+  let audioCtx = null;
   function playNotificationBeep() {
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return;
-      const ctx = new AudioCtx();
+      if (!audioCtx) audioCtx = new AudioCtx();
+      const ctx = audioCtx;
+      if (ctx.state === "suspended") ctx.resume().catch(() => {});
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
@@ -837,32 +840,25 @@
     }, 4500);
   }
 
-  // Register Inline Service Worker for Mobile Browsers
-  async function registerInlineServiceWorker() {
+  // Register Service Worker (sw.js) - required for notifications on mobile browsers
+  async function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     try {
-      const swCode = `
-        self.addEventListener('notificationclick', function(event) {
-          event.notification.close();
-          event.waitUntil(
-            clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-              for (var i = 0; i < clientList.length; i++) {
-                var client = clientList[i];
-                if ('focus' in client) return client.focus();
-              }
-              if (clients.openWindow) return clients.openWindow('/');
-            })
-          );
-        });
-      `;
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      const blobUrl = URL.createObjectURL(blob);
-      swRegistration = await navigator.serviceWorker.register(blobUrl);
+      await navigator.serviceWorker.register('sw.js');
+      swRegistration = await navigator.serviceWorker.ready;
     } catch (e) {
       console.warn("Service Worker registration skipped:", e);
     }
   }
-  registerInlineServiceWorker();
+  registerServiceWorker();
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'notification-click' && winEl.classList.contains("minimized")) {
+        toggleMinimizeWindow();
+      }
+    });
+  }
 
   // Taskbar Clock
   function updateTaskbarClock() {
@@ -1096,7 +1092,10 @@
     const statusMsg = $("notification-status-msg");
 
     if (!("Notification" in window)) {
-      statusMsg.textContent = "OS Notifications not supported. In-app alerts enabled.";
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      statusMsg.textContent = isIOS
+        ? "On iPhone/iPad: tap Share > Add to Home Screen, then open the portal from the home screen to get OS notifications. In-app alerts enabled."
+        : "OS Notifications not supported. In-app alerts enabled.";
       toggle.checked = true;
       return;
     }
@@ -1113,6 +1112,20 @@
       statusMsg.textContent = "OS permissions blocked. Falling back to in-app banner alerts.";
     } else if (Notification.permission === "granted") {
       statusMsg.textContent = "Notifications active on desktop and mobile.";
+    }
+
+    // Mobile browsers only allow the permission prompt after a tap, so ask on the first tap
+    if (isEnabled && Notification.permission === "default" && !initNotificationSettings.armed) {
+      initNotificationSettings.armed = true;
+      statusMsg.textContent = "Tap anywhere once to allow notifications.";
+      document.addEventListener("click", async () => {
+        try {
+          const p = await Notification.requestPermission();
+          statusMsg.textContent = p === "granted"
+            ? "Notifications active on desktop and mobile."
+            : "OS permission not granted. In-app banner alerts will be used.";
+        } catch (e) {}
+      }, { once: true });
     }
 
     toggle.addEventListener("change", async () => {
@@ -1152,7 +1165,7 @@
     };
   }
 
-  function triggerBrowserNotification(senderName, messageText, forceShow = false) {
+  async function triggerBrowserNotification(senderName, messageText, forceShow = false) {
     playNotificationBeep();
 
     const isEnabled = localStorage.getItem("apbn_notifications_enabled") !== "false";
@@ -1164,44 +1177,48 @@
 
     const isAppMinimized = winEl.classList.contains("minimized");
     const isHiddenTab = document.hidden || document.visibilityState !== "visible";
+    const shouldShowOS = forceShow || isAppMinimized || isHiddenTab;
 
-    // 1. Try Mobile Service Worker Notification
-    if (swRegistration && swRegistration.showNotification && Notification.permission === "granted") {
-      if (forceShow || isAppMinimized || isHiddenTab) {
-        swRegistration.showNotification(`Message from ${cleanSender}`, {
-          body: truncatedBody || "New message received.",
-          icon: "group-logo.png",
-          badge: "group-logo.png",
-          tag: "apbn-chat-" + Date.now(),
-          renotify: true
-        }).catch(() => {
-          showInAppToast(cleanSender, truncatedBody);
-        });
-        return;
-      }
-    }
+    if (shouldShowOS && "Notification" in window && Notification.permission === "granted") {
+      const title = `Message from ${cleanSender}`;
+      const options = {
+        body: truncatedBody || "New message received.",
+        icon: "group-logo.png",
+        badge: "group-logo.png",
+        tag: "apbn-chat-" + Date.now(),
+        renotify: true,
+        vibrate: [200, 100, 200]
+      };
 
-    // 2. Try Standard Desktop Web Notification
-    try {
-      if ("Notification" in window && Notification.permission === "granted") {
-        if (forceShow || isAppMinimized || isHiddenTab) {
-          const notif = new Notification(`Message from ${cleanSender}`, {
-            body: truncatedBody || "New message received.",
-            icon: "group-logo.png",
-            badge: "group-logo.png",
-            tag: "apbn-chat-" + Date.now(),
-            renotify: true
-          });
-          notif.onclick = () => {
-            window.focus();
-            if (winEl.classList.contains("minimized")) toggleMinimizeWindow();
-            notif.close();
-          };
+      // 1. Service Worker notification (the only method mobile browsers allow; works on desktop too)
+      try {
+        let reg = swRegistration;
+        if (!reg && "serviceWorker" in navigator) {
+          reg = await Promise.race([
+            navigator.serviceWorker.ready,
+            new Promise(resolve => setTimeout(() => resolve(null), 1500))
+          ]);
+        }
+        if (reg && reg.showNotification) {
+          await reg.showNotification(title, options);
           return;
         }
+      } catch (e) {
+        console.warn("Service Worker notification failed:", e);
       }
-    } catch (e) {
-      console.warn("Desktop Notification constructor failed:", e);
+
+      // 2. Standard Web Notification (desktop fallback)
+      try {
+        const notif = new Notification(title, options);
+        notif.onclick = () => {
+          window.focus();
+          if (winEl.classList.contains("minimized")) toggleMinimizeWindow();
+          notif.close();
+        };
+        return;
+      } catch (e) {
+        console.warn("Desktop Notification constructor failed:", e);
+      }
     }
 
     // 3. Fallback: Show In-App Floating Toast Banner
@@ -1725,6 +1742,13 @@
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
+    }
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && currentUser && initialMessagesLoaded) {
+      if (!realtimeChannel || realtimeChannel.state !== "joined") subscribeRealtime();
+      loadMessages();
     }
   });
 
