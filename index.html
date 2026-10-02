@@ -74,12 +74,13 @@
       align-items:center;
       justify-content:center;
       padding:18px;
+      position:relative;
       background:
         radial-gradient(ellipse 70% 24% at 52% 72%, rgba(132,255,214,.30) 0%, rgba(45,191,170,.18) 35%, transparent 70%),
         radial-gradient(ellipse 42% 80% at 78% 35%, rgba(73,165,255,.30) 0%, transparent 72%),
         linear-gradient(145deg,#03142f 0%,#064b7d 42%,#07858c 70%,#062c50 100%);
       background-attachment:fixed;
-      transition:all 0.2s ease-in-out;
+      transition:padding 0.2s ease-in-out;
     }
 
     .messenger-window{
@@ -92,8 +93,9 @@
       border-radius:8px;
       box-shadow:0 0 0 1px #b7c9db,0 18px 70px #000;
       overflow:hidden;
-      position:relative;
-      transition:all 0.2s ease-in-out;
+      position:absolute;
+      z-index:10;
+      transition:box-shadow 0.2s ease-in-out;
     }
 
     .messenger-window.minimized .workspace,
@@ -103,7 +105,6 @@
     .messenger-window.minimized {
       height:34px !important;
       min-height:34px !important;
-      align-self:flex-end;
     }
 
     .messenger-window.is-fullscreen {
@@ -114,13 +115,32 @@
       max-height:none !important;
       border-radius:0 !important;
       border:none !important;
+      top:0 !important;
+      left:0 !important;
+      transform:none !important;
     }
 
     #app.is-fullscreen-wrap {
       padding:0 !important;
     }
 
-    .app-titlebar{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;color:#fff;font-weight:bold;font-size:12px;background:linear-gradient(#63adff,#277bdd 45%,#0a4aa4);border-bottom:1px solid #123b70;text-shadow:1px 1px #1d4b80;user-select:none}.app-title{display:flex;align-items:center;gap:7px}.mini-logo{width:22px;height:22px;border-radius:3px;background:#fff;object-fit:contain;border:1px solid #adc3dc}
+    .app-titlebar{
+      height:34px;
+      flex:0 0 34px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 7px;
+      color:#fff;
+      font-weight:bold;
+      font-size:12px;
+      background:linear-gradient(#63adff,#277bdd 45%,#0a4aa4);
+      border-bottom:1px solid #123b70;
+      text-shadow:1px 1px #1d4b80;
+      user-select:none;
+      cursor:move;
+    }
+    .app-title{display:flex;align-items:center;gap:7px;pointer-events:none}.mini-logo{width:22px;height:22px;border-radius:3px;background:#fff;object-fit:contain;border:1px solid #adc3dc}
     .toolbar{height:38px;flex:0 0 38px;display:flex;align-items:center;gap:6px;padding:4px 8px;background:linear-gradient(#fff,#e3edf7);border-bottom:1px solid #a5b8cb}.toolbar .sep{height:23px;width:1px;background:#b7c4d1;margin:0 3px}.status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:#4a5f74}.status-dot{width:9px;height:9px;border-radius:50%;background:var(--xp-green);border:1px solid #176b2d}
     .workspace{flex:1;min-height:0;display:flex;background:#fff;overflow:hidden;position:relative}
     .sidebar{width:230px;flex:0 0 230px;background:linear-gradient(90deg,#eaf3fc,#d8e8f8);border-right:1px solid #9cafc3;padding:9px;display:flex;flex-direction:column;overflow-y:auto;position:relative}
@@ -210,7 +230,7 @@
       body { overflow: hidden; }
       .screen { padding: 0; }
       #app { padding: 0 !important; height: 100vh !important; height: 100dvh !important; }
-      .messenger-window { width: 100vw !important; height: 100vh !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; }
+      .messenger-window { width: 100vw !important; height: 100vh !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; top:0 !important; left:0 !important; }
       .sidebar { width: 140px; flex: 0 0 140px; padding: 6px; }
       .profile-box { padding: 4px; gap: 4px; }
       .profile-avatar { width: 32px; height: 32px; }
@@ -271,7 +291,7 @@
 
 <section id="app" class="hidden">
   <div class="messenger-window" id="messenger-window">
-    <div class="app-titlebar">
+    <div class="app-titlebar" id="app-titlebar">
       <div class="app-title"><img class="mini-logo" src="group-logo.png" alt=""><span>APBn Squad Message Portal</span></div>
       <div class="window-buttons">
         <button type="button" class="btn-min" id="win-min" title="Minimize">_</button>
@@ -419,6 +439,77 @@
     $("win-close").onclick = () => logout();
   }
   setupWindowControls();
+
+  // ================================
+  // DRAGGABLE WINDOW IMPLEMENTATION
+  // ================================
+  function setupDraggableWindow() {
+    const titleBar = $("app-titlebar");
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let initialLeft = 0, initialTop = 0;
+
+    function onPointerDown(e) {
+      if (winEl.classList.contains("is-fullscreen")) return;
+      if (e.target.closest("button")) return; // Don't drag if clicking buttons
+
+      isDragging = true;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      startX = clientX;
+      startY = clientY;
+
+      const rect = winEl.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      winEl.style.left = `${initialLeft}px`;
+      winEl.style.top = `${initialTop}px`;
+      winEl.style.margin = "0";
+
+      document.addEventListener("mousemove", onPointerMove);
+      document.addEventListener("mouseup", onPointerUp);
+      document.addEventListener("touchmove", onPointerMove, { passive: false });
+      document.addEventListener("touchend", onPointerUp);
+    }
+
+    function onPointerMove(e) {
+      if (!isDragging) return;
+      if (e.cancelable) e.preventDefault();
+
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      const deltaX = clientX - startX;
+      const deltaY = clientY - startY;
+
+      let newLeft = initialLeft + deltaX;
+      let newTop = initialTop + deltaY;
+
+      // Keep within viewport boundaries
+      const maxLeft = window.innerWidth - winEl.offsetWidth;
+      const maxTop = window.innerHeight - 34; // keep title bar accessible
+      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+      newTop = Math.max(0, Math.min(newTop, maxTop));
+
+      winEl.style.left = `${newLeft}px`;
+      winEl.style.top = `${newTop}px`;
+    }
+
+    function onPointerUp() {
+      isDragging = false;
+      document.removeEventListener("mousemove", onPointerMove);
+      document.removeEventListener("mouseup", onPointerUp);
+      document.removeEventListener("touchmove", onPointerMove);
+      document.removeEventListener("touchend", onPointerUp);
+    }
+
+    titleBar.addEventListener("mousedown", onPointerDown);
+    titleBar.addEventListener("touchstart", onPointerDown, { passive: true });
+  }
+
+  setupDraggableWindow();
 
   function authEmail(username) {
     const bytes = new TextEncoder().encode(username.trim().toLowerCase());
