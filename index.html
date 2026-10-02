@@ -397,6 +397,7 @@
   let replyTo = null;
   let realtimeChannel = null;
   let popoverTimeout = null;
+  let activeTarget = null;
 
   const usernameRegex = /^[A-Za-z]+@[0-9]+$/;
 
@@ -563,31 +564,45 @@
 
     document.addEventListener("click", (e) => {
       if (!popover.contains(e.target) && !sidebarBox.contains(e.target) && !e.target.closest(".user-clickable") && !e.target.closest(".msg-avatar")) {
-        popover.classList.remove("show");
+        hidePopover();
       }
     });
 
     // Hide popover on scrolling messages
     messagesEl.addEventListener("scroll", () => {
-      popover.classList.remove("show");
+      hidePopover();
     });
 
     $("popover-edit-btn").onclick = () => {
-      popover.classList.remove("show");
+      hidePopover();
       openEditProfileModal();
     };
+  }
+
+  function hidePopover() {
+    clearTimeout(popoverTimeout);
+    const popover = $("profile-popover");
+    popover.classList.remove("show");
+    popover.style.display = "none";
+    activeTarget = null;
   }
 
   function schedulePopoverHide() {
     clearTimeout(popoverTimeout);
     popoverTimeout = setTimeout(() => {
       const popover = $("profile-popover");
-      if (!popover.matches(":hover")) popover.classList.remove("show");
+      const isPopoverHovered = popover.matches(":hover");
+      const isTargetHovered = activeTarget && activeTarget.matches(":hover");
+
+      if (!isPopoverHovered && !isTargetHovered) {
+        hidePopover();
+      }
     }, 200);
   }
 
   function showPopoverForProfile(profileData, targetElement) {
     clearTimeout(popoverTimeout);
+    activeTarget = targetElement;
     const popover = $("profile-popover");
 
     const displayName = profileData.display_name || profileData.username || "Unknown";
