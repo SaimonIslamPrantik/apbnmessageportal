@@ -92,6 +92,7 @@
       border-radius:8px;
       box-shadow:0 0 0 1px #b7c9db,0 18px 70px #000;
       overflow:hidden;
+      position:relative;
       transition:all 0.2s ease-in-out;
     }
 
@@ -124,7 +125,7 @@
     .workspace{flex:1;min-height:0;display:flex;background:#fff;overflow:hidden}
     .sidebar{width:230px;flex:0 0 230px;background:linear-gradient(90deg,#eaf3fc,#d8e8f8);border-right:1px solid #9cafc3;padding:9px;display:flex;flex-direction:column;overflow-y:auto;position:relative}
 
-    /* PROFILE CARD & HOVER POPOVER */
+    /* SIDEBAR PROFILE CARD */
     .profile-box{
       display:flex;
       gap:8px;
@@ -147,25 +148,23 @@
     .profile-subname{font-size:10px;color:#5a6e85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .profile-state{font-size:11px;color:#2b7a3b;margin-top:2px;display:flex;align-items:center;gap:4px}
 
-    /* PROFILE POPOVER CARD */
+    /* REUSABLE PROFILE POPOVER CARD */
     .profile-popover{
       position:absolute;
-      top:65px;
-      left:9px;
       width:240px;
       background:linear-gradient(#f8fcff,#e2edf8);
       border:1px solid #4a6c8e;
       border-radius:6px;
       box-shadow:0 8px 24px rgba(0,0,0,0.35);
       padding:12px;
-      z-index:90;
+      z-index:900;
       display:none;
       flex-direction:column;
       gap:8px;
     }
     .profile-popover.show{display:flex}
     .popover-head{display:flex;gap:10px;align-items:center}
-    .popover-avatar{width:50px;height:50px;border-radius:4px;border:1px solid #7d96af;object-fit:cover}
+    .popover-avatar{width:50px;height:50px;border-radius:4px;border:1px solid #7d96af;object-fit:cover;background:#fff}
     .popover-details{flex:1;min-width:0}
     .popover-title{font-weight:bold;font-size:13px;color:#0d325c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .popover-handle{font-size:11px;color:#5a6e85}
@@ -178,9 +177,31 @@
 
     .side-title{font-weight:bold;font-size:11px;color:#40566c;margin:12px 4px 5px}.contact{display:flex;gap:7px;align-items:center;padding:7px 6px;border-radius:3px;font-size:12px;color:#314a62}.contact.active{background:linear-gradient(#fff,#d6e7f8);border:1px solid #a6bdd5}.contact-dot{width:10px;height:10px;border-radius:50%;background:#3aaa55;border:1px solid #1b7330}.rules{margin-top:auto;font-size:10px;line-height:1.45;color:#5c6b79;background:#eef5fb;border:1px solid #b8c7d6;padding:7px;border-radius:3px}
     main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;background:#fff}.chat-header{height:54px;flex:0 0 54px;background:linear-gradient(#fff,#e4edf6);border-bottom:1px solid #a9bacb;padding:8px 12px}.chat-header strong{font-size:14px;color:#173c64}.chat-header small{display:block;color:#6b7887;font-size:10px;margin-top:2px}
-    #messages{flex:1;overflow-y:auto;padding:12px 14px;background:#fff;scrollbar-color:#9aaabc #edf2f7}.msg{position:relative;margin:0 0 8px;padding:8px 10px;background:#fff;border-bottom:1px solid #d8e0e8}.msg.mine{background:#f3f8fd;border-left:3px solid #4d91d8}.msg.deleted{opacity:.72}.msg-head{display:flex;align-items:center;gap:7px;margin-bottom:2px}.user{font-weight:bold;color:#144f8f;font-size:12px}.time{font-size:10px;color:#7a8794}.body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;color:#1b1b1b}.deleted-text{font-style:italic;color:#7b8793}.mention{color:#065db3;font-weight:bold}.reply-line{font-size:10px;color:#667787;border-left:2px solid #8fb5dc;padding-left:7px;margin-bottom:5px}.msg-tools{display:flex;justify-content:flex-end;gap:5px;margin-top:5px}.tiny{border:1px solid #9aaabd;background:linear-gradient(#fff,#e3eaf1);color:#2a4056;border-radius:2px;padding:3px 7px;font-size:10px}.tiny:hover{background:#dcecff}
+    #messages{flex:1;overflow-y:auto;padding:12px 14px;background:#fff;scrollbar-color:#9aaabc #edf2f7;position:relative}
+    .msg{position:relative;margin:0 0 8px;padding:8px 10px;background:#fff;border-bottom:1px solid #d8e0e8;display:flex;gap:10px;align-items:flex-start}
+    .msg.mine{background:#f3f8fd;border-left:3px solid #4d91d8}.msg.deleted{opacity:.72}
+    .msg-avatar{width:36px;height:36px;border-radius:4px;border:1px solid #9aaabc;object-fit:cover;cursor:pointer;flex-shrink:0;margin-top:2px}
+    .msg-avatar:hover{filter:brightness(1.1)}
+    .msg-content-wrap{flex:1;min-width:0}
+    .msg-head{display:flex;align-items:center;gap:7px;margin-bottom:2px}
+    
+    /* CHAT USERNAME HOVER STYLE */
+    .user-clickable{
+      font-weight:bold;
+      color:#144f8f;
+      font-size:12px;
+      cursor:pointer;
+      text-decoration:none;
+      transition:all 0.15s ease;
+    }
+    .user-clickable:hover{
+      color:#004085;
+      text-decoration:underline;
+    }
+
+    .time{font-size:10px;color:#7a8794}.body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;color:#1b1b1b}.deleted-text{font-style:italic;color:#7b8793}.mention{color:#065db3;font-weight:bold}.reply-line{font-size:10px;color:#667787;border-left:2px solid #8fb5dc;padding-left:7px;margin-bottom:5px}.msg-tools{display:flex;justify-content:flex-end;gap:5px;margin-top:5px}.tiny{border:1px solid #9aaabd;background:linear-gradient(#fff,#e3eaf1);color:#2a4056;border-radius:2px;padding:3px 7px;font-size:10px}.tiny:hover{background:#dcecff}
     #composer-wrap{padding:7px 10px 9px;background:linear-gradient(#edf4fb,#d7e6f4);border-top:1px solid #a7b8ca}.reply-banner{max-width:none;margin:0 0 5px;background:#fff7cf;border:1px solid #dfca79;padding:5px 8px;border-radius:2px;font-size:10px;color:#655522;display:flex;justify-content:space-between}.composer{display:flex;gap:6px;align-items:flex-end}.composer textarea{flex:1;min-height:42px;max-height:100px}
-    .modal{position:fixed;inset:0;background:#0009;display:grid;place-items:center;padding:20px;z-index:100}.modal .card{max-height:90vh;overflow:auto;padding:16px}.admin-row{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid #d2dce6}
+    .modal{position:fixed;inset:0;background:#0009;display:grid;place-items:center;padding:20px;z-index:1000}.modal .card{max-height:90vh;overflow:auto;padding:16px}.admin-row{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid #d2dce6}
     .empty{text-align:center;color:#7b8792;padding:50px 10px;font-size:12px}
 
     @media (max-width: 768px) {
@@ -191,7 +212,7 @@
       .sidebar { width: 140px; flex: 0 0 140px; padding: 6px; }
       .profile-box { padding: 4px; gap: 4px; }
       .profile-avatar { width: 32px; height: 32px; }
-      .profile-popover { width: 200px; top: 55px; left: 4px; }
+      .profile-popover { width: 200px; }
       .rules { display: none; }
       .toolbar { overflow-x: auto; padding: 2px 4px; }
       .toolbar .btn { padding: 5px 8px; font-size: 11px; }
@@ -264,7 +285,7 @@
     </div>
     <div class="workspace">
       <aside class="sidebar">
-        <!-- PROFILE CARD ON SIDEBAR -->
+        <!-- SIDEBAR PROFILE CARD -->
         <div class="profile-box" id="profile-box">
           <img class="profile-avatar" id="sidebar-avatar" src="group-logo.png" alt="">
           <div style="min-width:0;flex:1">
@@ -272,20 +293,6 @@
             <div class="profile-subname" id="subwho">@user</div>
             <div class="profile-state"><span class="status-dot"></span>Online</div>
           </div>
-        </div>
-
-        <!-- HOVER / CLICK PROFILE POPOVER -->
-        <div class="profile-popover" id="profile-popover">
-          <div class="popover-head">
-            <img class="popover-avatar" id="popover-avatar" src="group-logo.png" alt="">
-            <div class="popover-details">
-              <div class="popover-title" id="popover-display-name">Display Name</div>
-              <div class="popover-handle" id="popover-username">@username</div>
-              <div id="popover-badge"></div>
-            </div>
-          </div>
-          <div class="popover-bio" id="popover-bio">No bio added yet.</div>
-          <button class="btn full" id="popover-edit-btn" style="margin-top:4px;padding:5px">Edit Profile</button>
         </div>
 
         <div class="side-title">SQUAD</div>
@@ -307,6 +314,20 @@
         </div>
       </main>
     </div>
+  </div>
+
+  <!-- SINGLE REUSABLE POPOVER CARD FOR BOTH SIDEBAR AND CHAT USERS -->
+  <div class="profile-popover" id="profile-popover">
+    <div class="popover-head">
+      <img class="popover-avatar" id="popover-avatar" src="group-logo.png" alt="">
+      <div class="popover-details">
+        <div class="popover-title" id="popover-display-name">Display Name</div>
+        <div class="popover-handle" id="popover-username">@username</div>
+        <div id="popover-badge"></div>
+      </div>
+    </div>
+    <div class="popover-bio" id="popover-bio">No bio added yet.</div>
+    <button class="btn full" id="popover-edit-btn" style="margin-top:4px;padding:5px">Edit Profile</button>
   </div>
 </section>
 
@@ -373,6 +394,7 @@
   let currentProfile = null;
   let replyTo = null;
   let realtimeChannel = null;
+  let popoverTimeout = null;
 
   const usernameRegex = /^[A-Za-z]+@[0-9]+$/;
 
@@ -521,35 +543,24 @@
   }
 
   // ================================
-  // PROFILE HOVER & POPOVER LOGIC
+  // UNIVERSAL PROFILE POPOVER LOGIC
   // ================================
   function setupProfileEvents() {
-    const box = $("profile-box");
     const popover = $("profile-popover");
-    let hoverTimeout;
+    const sidebarBox = $("profile-box");
 
-    box.addEventListener("mouseenter", () => {
-      hoverTimeout = setTimeout(() => popover.classList.add("show"), 200);
-    });
-
-    box.addEventListener("mouseleave", () => {
-      clearTimeout(hoverTimeout);
-      setTimeout(() => {
-        if (!popover.matches(":hover")) popover.classList.remove("show");
-      }, 150);
-    });
-
-    popover.addEventListener("mouseleave", () => {
-      popover.classList.remove("show");
-    });
-
-    box.addEventListener("click", (e) => {
+    sidebarBox.addEventListener("mouseenter", (e) => showPopoverForProfile(currentProfile, sidebarBox, e));
+    sidebarBox.addEventListener("mouseleave", schedulePopoverHide);
+    sidebarBox.addEventListener("click", (e) => {
       e.stopPropagation();
-      popover.classList.toggle("show");
+      showPopoverForProfile(currentProfile, sidebarBox, e);
     });
+
+    popover.addEventListener("mouseenter", () => clearTimeout(popoverTimeout));
+    popover.addEventListener("mouseleave", schedulePopoverHide);
 
     document.addEventListener("click", (e) => {
-      if (!popover.contains(e.target) && !box.contains(e.target)) {
+      if (!popover.contains(e.target) && !sidebarBox.contains(e.target) && !e.target.closest(".user-clickable") && !e.target.closest(".msg-avatar")) {
         popover.classList.remove("show");
       }
     });
@@ -559,6 +570,62 @@
       openEditProfileModal();
     };
   }
+
+  function schedulePopoverHide() {
+    clearTimeout(popoverTimeout);
+    popoverTimeout = setTimeout(() => {
+      const popover = $("profile-popover");
+      if (!popover.matches(":hover")) popover.classList.remove("show");
+    }, 200);
+  }
+
+  function showPopoverForProfile(profileData, targetElement, event) {
+    clearTimeout(popoverTimeout);
+    const popover = $("profile-popover");
+
+    const displayName = profileData.display_name || profileData.username || "Unknown";
+    const avatar = profileData.avatar_url || "group-logo.png";
+    const bio = profileData.bio || "No bio added yet.";
+    const isAdmin = profileData.role === "admin";
+    const isSelf = profileData.id === currentUser.id;
+
+    $("popover-display-name").textContent = displayName;
+    $("popover-username").textContent = "@" + (profileData.username || "user");
+    $("popover-avatar").src = avatar;
+    $("popover-bio").textContent = bio;
+
+    const badgeEl = $("popover-badge");
+    badgeEl.className = "role-badge " + (isAdmin ? "admin" : "member");
+    badgeEl.textContent = isAdmin ? "★ Admin" : "Member";
+
+    $("popover-edit-btn").classList.toggle("hidden", !isSelf);
+
+    // Dynamic Positioning
+    const targetRect = targetElement.getBoundingClientRect();
+    const winRect = winEl.getBoundingClientRect();
+
+    let top = targetRect.bottom - winRect.top + 5;
+    let left = targetRect.left - winRect.left;
+
+    // Boundary adjust
+    if (left + 240 > winRect.width) left = winRect.width - 250;
+    if (top + 160 > winRect.height) top = targetRect.top - winRect.top - 170;
+
+    popover.style.top = `${Math.max(10, top)}px`;
+    popover.style.left = `${Math.max(10, left)}px`;
+
+    popover.classList.add("show");
+  }
+
+  function attachChatUserEvents(element, profileData) {
+    element.addEventListener("mouseenter", (e) => showPopoverForProfile(profileData, element, e));
+    element.addEventListener("mouseleave", schedulePopoverHide);
+    element.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showPopoverForProfile(profileData, element, e);
+    });
+  }
+
   setupProfileEvents();
 
   function openEditProfileModal() {
@@ -610,24 +677,12 @@
 
     const displayName = currentProfile.display_name || currentProfile.username;
     const avatar = currentProfile.avatar_url || "group-logo.png";
-    const bio = currentProfile.bio || "No bio added yet.";
     const isAdmin = currentProfile.role === "admin";
 
     // Sidebar Profile
     $("who").textContent = displayName;
     $("subwho").textContent = "@" + currentProfile.username;
     $("sidebar-avatar").src = avatar;
-
-    // Popover Card
-    $("popover-display-name").textContent = displayName;
-    $("popover-username").textContent = "@" + currentProfile.username;
-    $("popover-avatar").src = avatar;
-    $("popover-bio").textContent = bio;
-
-    // Admin / Member Badge
-    const badgeEl = $("popover-badge");
-    badgeEl.className = "role-badge " + (isAdmin ? "admin" : "member");
-    badgeEl.textContent = isAdmin ? "★ Admin" : "Member";
 
     $("admin-btn").classList.toggle("hidden", !isAdmin);
   }
@@ -651,7 +706,7 @@
     const { data, error } = await sb.from("messages")
       .select(`
         id, user_id, content, created_at, deleted, reply_to,
-        profiles:user_id(username, display_name, avatar_url, role)
+        profiles:user_id(id, username, display_name, avatar_url, bio, role)
       `)
       .order("created_at", { ascending: true });
 
@@ -680,6 +735,7 @@
       const profile = row.profiles || {};
       const username = profile.username || "Unknown";
       const displayName = profile.display_name || username;
+      const avatar = profile.avatar_url || "group-logo.png";
       const isAdmin = profile.role === "admin";
       const reply = row.reply_to ? byId.get(row.reply_to) : null;
 
@@ -691,20 +747,29 @@
       }
 
       article.innerHTML = `
-        <div class="msg-head">
-          <span class="user">${escapeHTML(displayName)}</span>
-          <span style="font-size:10px;color:#6b7887">(@${escapeHTML(username)})</span>
-          ${isAdmin ? '<span class="role-badge admin" style="font-size:8px">Admin</span>' : ''}
-          <span class="time">${formatTime(row.created_at)}</span>
-        </div>
-        ${replyHTML}
-        <div class="body">${row.deleted ? '<span class="deleted-text">This message is deleted</span>' : formatText(row.content)}</div>
-        <div class="msg-tools">
-          ${!row.deleted ? '<button class="tiny reply-btn">Reply</button>' : ''}
-          ${!row.deleted && row.user_id === currentUser.id ? '<button class="tiny delete-msg-btn">Delete</button>' : ''}
-          ${!row.deleted && currentProfile?.role === "admin" ? '<button class="tiny delete-admin-btn">Remove</button>' : ''}
+        <img class="msg-avatar" src="${escapeHTML(avatar)}" alt="">
+        <div class="msg-content-wrap">
+          <div class="msg-head">
+            <span class="user-clickable">${escapeHTML(displayName)}</span>
+            <span style="font-size:10px;color:#6b7887">(@${escapeHTML(username)})</span>
+            ${isAdmin ? '<span class="role-badge admin" style="font-size:8px">Admin</span>' : ''}
+            <span class="time">${formatTime(row.created_at)}</span>
+          </div>
+          ${replyHTML}
+          <div class="body">${row.deleted ? '<span class="deleted-text">This message is deleted</span>' : formatText(row.content)}</div>
+          <div class="msg-tools">
+            ${!row.deleted ? '<button class="tiny reply-btn">Reply</button>' : ''}
+            ${!row.deleted && row.user_id === currentUser.id ? '<button class="tiny delete-msg-btn">Delete</button>' : ''}
+            ${!row.deleted && currentProfile?.role === "admin" ? '<button class="tiny delete-admin-btn">Remove</button>' : ''}
+          </div>
         </div>
       `;
+
+      // Attach Hover Popover Events to Chat Username & Avatar
+      const usernameEl = article.querySelector(".user-clickable");
+      const avatarEl = article.querySelector(".msg-avatar");
+      if (usernameEl) attachChatUserEvents(usernameEl, profile);
+      if (avatarEl) attachChatUserEvents(avatarEl, profile);
 
       const replyBtn = article.querySelector(".reply-btn");
       if (replyBtn) replyBtn.onclick = () => startReply(row, username);
