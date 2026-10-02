@@ -15,7 +15,10 @@
     *{box-sizing:border-box}
     html,body{
       margin:0;
-      min-height:100%;
+      padding:0;
+      width:100%;
+      height:100%;
+      min-height:100vh;
       color:var(--text);
       background:
         radial-gradient(ellipse at 18% 85%, rgba(18,125,112,.95) 0%, rgba(18,125,112,.55) 18%, transparent 43%),
@@ -27,12 +30,11 @@
     body{font-family:Tahoma,Verdana,Arial,sans-serif;overflow:hidden}
     button,input,textarea{font:inherit} button{cursor:pointer}.hidden{display:none!important}
 
-    /* Black desktop backdrop + Windows Messenger-era application window */
     .screen{
       min-height:100vh;
       display:grid;
       place-items:center;
-      padding:24px;
+      padding:16px;
       background:
         radial-gradient(ellipse 70% 24% at 52% 72%, rgba(132,255,214,.30) 0%, rgba(45,191,170,.18) 35%, transparent 70%),
         radial-gradient(ellipse 42% 80% at 78% 35%, rgba(73,165,255,.30) 0%, transparent 72%),
@@ -40,13 +42,34 @@
       background-attachment:fixed;
     }
     .card{width:min(430px,100%);background:linear-gradient(#f9fcff,#dbe9f8);border:1px solid #526b88;border-radius:8px;box-shadow:0 0 0 1px #dce8f4,0 14px 50px #000;overflow:hidden;padding:0}
-    .xp-titlebar{height:31px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;color:#fff;font-weight:bold;font-size:12px;background:linear-gradient(#65adff 0,#2679dd 42%,#0b4ba7 100%);border-bottom:1px solid #0a3678;text-shadow:1px 1px #16457c}
-    .window-buttons{display:flex;gap:3px}.window-buttons span{width:19px;height:18px;display:grid;place-items:center;border:1px solid #bcd5f3;border-radius:3px;background:linear-gradient(#6eb4ff,#1663be);font-size:11px}.window-buttons .close{background:linear-gradient(#ff7b70,#b9150d);border-color:#ffd0cc}
+    .xp-titlebar{height:31px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;color:#fff;font-weight:bold;font-size:12px;background:linear-gradient(#65adff 0,#2679dd 42%,#0b4ba7 100%);border-bottom:1px solid #0a3678;text-shadow:1px 1px #16457c;user-select:none}
+    
+    .window-buttons{display:flex;gap:3px}
+    .window-buttons button{
+      width:20px;
+      height:19px;
+      display:grid;
+      place-items:center;
+      border:1px solid #bcd5f3;
+      border-radius:3px;
+      background:linear-gradient(#6eb4ff,#1663be);
+      color:#fff;
+      font-size:11px;
+      font-weight:bold;
+      padding:0;
+      line-height:1;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.4);
+    }
+    .window-buttons button:hover{filter:brightness(1.15)}
+    .window-buttons button:active{filter:brightness(0.85)}
+    .window-buttons button.close{background:linear-gradient(#ff7b70,#b9150d);border-color:#ffd0cc}
+
     .login-inner{padding:20px 24px 22px}.login-head{display:flex;gap:18px;align-items:center;margin-bottom:15px}.login-logo{width:90px;height:90px;border-radius:9px;border:1px solid #91a8bf;background:#fff;object-fit:contain;box-shadow:0 2px 5px #66778855}.login-title h1{font:700 21px Tahoma,Verdana,sans-serif;margin:0 0 4px;color:#173a68;text-transform:none;text-shadow:none}.login-title p{margin:0;color:#5c6f84;font-size:12px}.sub{color:#5d6d7e;margin:0 0 16px;font-size:12px}
     label{display:block;color:#23384d;font-size:12px;margin:11px 0 5px}input,textarea{width:100%;background:#fff;color:#111;border:1px solid #8197ad;border-radius:2px;padding:8px 9px;outline:none;box-shadow:inset 0 1px 2px #8899aa44}input:focus,textarea:focus{border-color:#347dcc;box-shadow:0 0 0 1px #76aee8}.btn{border:1px solid #315f91;border-radius:3px;padding:7px 14px;background:linear-gradient(#fff,#d9e7f5 48%,#b7cde4);color:#102d4b;font-weight:bold;font-size:12px;box-shadow:inset 0 1px #fff,0 1px 2px #0003}.btn:hover{filter:brightness(1.04)}.btn.secondary{background:linear-gradient(#fff,#e7eef5 48%,#cbd9e7);color:#21384f}.btn.danger{background:linear-gradient(#fff,#ffdede 48%,#f0a9a9);color:#7c0000;border-color:#a55}.btn.full{width:100%;margin-top:14px}.switch{margin-top:15px;text-align:center;color:#5c6d80;font-size:11px}.switch button{background:none;border:0;color:#064fa9;text-decoration:underline;padding:0}.error,.ok{margin-top:12px;padding:8px;border-radius:3px;font-size:11px}.error{background:#ffe2e2;border:1px solid #cf8d8d;color:#8a0000}.ok{background:#e1f5e5;border:1px solid #8abf93;color:#126022}
 
     #app{
       height:100vh;
+      height:100dvh;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -56,60 +79,95 @@
         radial-gradient(ellipse 42% 80% at 78% 35%, rgba(73,165,255,.30) 0%, transparent 72%),
         linear-gradient(145deg,#03142f 0%,#064b7d 42%,#07858c 70%,#062c50 100%);
       background-attachment:fixed;
+      transition:all 0.2s ease-in-out;
     }
-    .messenger-window{width:min(980px,100%);height:min(760px,calc(100vh - 36px));display:flex;flex-direction:column;background:#edf4fc;border:1px solid #476481;border-radius:8px;box-shadow:0 0 0 1px #b7c9db,0 18px 70px #000;overflow:hidden}
-    .app-titlebar{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;color:#fff;font-weight:bold;font-size:12px;background:linear-gradient(#63adff,#277bdd 45%,#0a4aa4);border-bottom:1px solid #123b70;text-shadow:1px 1px #1d4b80}.app-title{display:flex;align-items:center;gap:7px}.mini-logo{width:22px;height:22px;border-radius:3px;background:#fff;object-fit:contain;border:1px solid #adc3dc}.app-titlebar .window-buttons span{width:20px;height:19px}
+
+    .messenger-window{
+      width:min(980px, 100%);
+      height:min(760px, calc(100vh - 36px));
+      display:flex;
+      flex-direction:column;
+      background:#edf4fc;
+      border:1px solid #476481;
+      border-radius:8px;
+      box-shadow:0 0 0 1px #b7c9db,0 18px 70px #000;
+      overflow:hidden;
+      transition:all 0.2s ease-in-out;
+    }
+
+    .messenger-window.minimized .workspace,
+    .messenger-window.minimized .toolbar {
+      display:none !important;
+    }
+    .messenger-window.minimized {
+      height:34px !important;
+      min-height:34px !important;
+      align-self:flex-end;
+    }
+
+    .messenger-window.is-fullscreen {
+      width:100vw !important;
+      height:100vh !important;
+      height:100dvh !important;
+      max-width:none !important;
+      max-height:none !important;
+      border-radius:0 !important;
+      border:none !important;
+    }
+
+    #app.is-fullscreen-wrap {
+      padding:0 !important;
+    }
+
+    .app-titlebar{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;color:#fff;font-weight:bold;font-size:12px;background:linear-gradient(#63adff,#277bdd 45%,#0a4aa4);border-bottom:1px solid #123b70;text-shadow:1px 1px #1d4b80;user-select:none}.app-title{display:flex;align-items:center;gap:7px}.mini-logo{width:22px;height:22px;border-radius:3px;background:#fff;object-fit:contain;border:1px solid #adc3dc}
     .toolbar{height:38px;flex:0 0 38px;display:flex;align-items:center;gap:6px;padding:4px 8px;background:linear-gradient(#fff,#e3edf7);border-bottom:1px solid #a5b8cb}.toolbar .sep{height:23px;width:1px;background:#b7c4d1;margin:0 3px}.status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:#4a5f74}.status-dot{width:9px;height:9px;border-radius:50%;background:var(--xp-green);border:1px solid #176b2d}
-    .workspace{flex:1;min-height:0;display:flex;background:#fff}
-    .sidebar{width:220px;flex:0 0 220px;background:linear-gradient(90deg,#eaf3fc,#d8e8f8);border-right:1px solid #9cafc3;padding:9px;display:flex;flex-direction:column}.profile-box{display:flex;gap:8px;padding:8px;background:linear-gradient(#fff,#e4edf6);border:1px solid #a5b6c7;border-radius:4px;box-shadow:inset 0 1px #fff}.profile-avatar{width:44px;height:44px;border:1px solid #91a6ba;background:#fff;border-radius:4px;object-fit:contain}.profile-name{font-weight:bold;color:#1d426c;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.profile-state{font-size:11px;color:#2b7a3b;margin-top:3px}.side-title{font-weight:bold;font-size:11px;color:#40566c;margin:12px 4px 5px}.contact{display:flex;gap:7px;align-items:center;padding:7px 6px;border-radius:3px;font-size:12px;color:#314a62}.contact.active{background:linear-gradient(#fff,#d6e7f8);border:1px solid #a6bdd5}.contact-dot{width:10px;height:10px;border-radius:50%;background:#3aaa55;border:1px solid #1b7330}.rules{margin-top:auto;font-size:10px;line-height:1.45;color:#5c6b79;background:#eef5fb;border:1px solid #b8c7d6;padding:7px;border-radius:3px}
+    .workspace{flex:1;min-height:0;display:flex;background:#fff;overflow:hidden}
+    .sidebar{width:220px;flex:0 0 220px;background:linear-gradient(90deg,#eaf3fc,#d8e8f8);border-right:1px solid #9cafc3;padding:9px;display:flex;flex-direction:column;overflow-y:auto}.profile-box{display:flex;gap:8px;padding:8px;background:linear-gradient(#fff,#e4edf6);border:1px solid #a5b6c7;border-radius:4px;box-shadow:inset 0 1px #fff}.profile-avatar{width:44px;height:44px;border:1px solid #91a6ba;background:#fff;border-radius:4px;object-fit:contain}.profile-name{font-weight:bold;color:#1d426c;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.profile-state{font-size:11px;color:#2b7a3b;margin-top:3px}.side-title{font-weight:bold;font-size:11px;color:#40566c;margin:12px 4px 5px}.contact{display:flex;gap:7px;align-items:center;padding:7px 6px;border-radius:3px;font-size:12px;color:#314a62}.contact.active{background:linear-gradient(#fff,#d6e7f8);border:1px solid #a6bdd5}.contact-dot{width:10px;height:10px;border-radius:50%;background:#3aaa55;border:1px solid #1b7330}.rules{margin-top:auto;font-size:10px;line-height:1.45;color:#5c6b79;background:#eef5fb;border:1px solid #b8c7d6;padding:7px;border-radius:3px}
     main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;background:#fff}.chat-header{height:54px;flex:0 0 54px;background:linear-gradient(#fff,#e4edf6);border-bottom:1px solid #a9bacb;padding:8px 12px}.chat-header strong{font-size:14px;color:#173c64}.chat-header small{display:block;color:#6b7887;font-size:10px;margin-top:2px}
-    #messages{flex:1;overflow:auto;padding:12px 14px;background:#fff;scrollbar-color:#9aaabc #edf2f7}.msg{position:relative;margin:0 0 8px;padding:8px 10px;background:#fff;border-bottom:1px solid #d8e0e8}.msg.mine{background:#f3f8fd;border-left:3px solid #4d91d8}.msg.deleted{opacity:.72}.msg-head{display:flex;align-items:center;gap:7px;margin-bottom:2px}.user{font-weight:bold;color:#144f8f;font-size:12px}.time{font-size:10px;color:#7a8794}.body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;color:#1b1b1b}.deleted-text{font-style:italic;color:#7b8793}.mention{color:#065db3;font-weight:bold}.reply-line{font-size:10px;color:#667787;border-left:2px solid #8fb5dc;padding-left:7px;margin-bottom:5px}.msg-tools{display:flex;justify-content:flex-end;gap:5px;margin-top:5px}.tiny{border:1px solid #9aaabd;background:linear-gradient(#fff,#e3eaf1);color:#2a4056;border-radius:2px;padding:3px 7px;font-size:10px}.tiny:hover{background:#dcecff}
+    #messages{flex:1;overflow-y:auto;padding:12px 14px;background:#fff;scrollbar-color:#9aaabc #edf2f7}.msg{position:relative;margin:0 0 8px;padding:8px 10px;background:#fff;border-bottom:1px solid #d8e0e8}.msg.mine{background:#f3f8fd;border-left:3px solid #4d91d8}.msg.deleted{opacity:.72}.msg-head{display:flex;align-items:center;gap:7px;margin-bottom:2px}.user{font-weight:bold;color:#144f8f;font-size:12px}.time{font-size:10px;color:#7a8794}.body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;color:#1b1b1b}.deleted-text{font-style:italic;color:#7b8793}.mention{color:#065db3;font-weight:bold}.reply-line{font-size:10px;color:#667787;border-left:2px solid #8fb5dc;padding-left:7px;margin-bottom:5px}.msg-tools{display:flex;justify-content:flex-end;gap:5px;margin-top:5px}.tiny{border:1px solid #9aaabd;background:linear-gradient(#fff,#e3eaf1);color:#2a4056;border-radius:2px;padding:3px 7px;font-size:10px}.tiny:hover{background:#dcecff}
     #composer-wrap{padding:7px 10px 9px;background:linear-gradient(#edf4fb,#d7e6f4);border-top:1px solid #a7b8ca}.reply-banner{max-width:none;margin:0 0 5px;background:#fff7cf;border:1px solid #dfca79;padding:5px 8px;border-radius:2px;font-size:10px;color:#655522;display:flex;justify-content:space-between}.composer{display:flex;gap:6px;align-items:flex-end}.composer textarea{flex:1;min-height:42px;max-height:100px}
-    .modal{position:fixed;inset:0;background:#0009;display:grid;place-items:center;padding:20px;z-index:10}.modal .card{max-height:90vh;overflow:auto}.admin-row{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid #d2dce6}.badge{font-size:9px;border:1px solid #9eafc0;border-radius:8px;padding:2px 5px;color:#657688}.badge.admin{color:#135c9e;border-color:#7da8cf}
+    .modal{position:fixed;inset:0;background:#0009;display:grid;place-items:center;padding:20px;z-index:100}.modal .card{max-height:90vh;overflow:auto}.admin-row{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid #d2dce6}.badge{font-size:9px;border:1px solid #9eafc0;border-radius:8px;padding:2px 5px;color:#657688}.badge.admin{color:#135c9e;border-color:#7da8cf}
     .empty{text-align:center;color:#7b8792;padding:50px 10px;font-size:12px}
-    /* Mobile / normal view only: keep desktop layout unchanged, but make all content reachable. */
-    @media(max-width:700px){
-      html,body{min-height:100%;height:auto;overflow:auto}
-      body{overflow-x:hidden}
-      .screen{min-height:100vh;height:auto;place-items:start center;padding:12px}
-      .card{width:100%;max-width:430px}
-      #app{height:auto;min-height:100vh;align-items:flex-start;padding:0;overflow:visible}
-      .messenger-window{width:100%;height:auto;min-height:100vh;border-radius:0;overflow:visible}
-      .toolbar{overflow-x:auto;overflow-y:hidden;white-space:nowrap;flex-wrap:nowrap}
-      .workspace{min-height:calc(100vh - 72px);height:auto}
-      main{min-height:calc(100vh - 72px);height:auto}
-      #messages{min-height:300px;overflow-y:auto}
-      #composer-wrap{position:relative}
-      .brand-text{display:none}
+
+    @media (max-width: 768px) {
+      body { overflow: hidden; }
+      .screen { padding: 0; }
+      #app {
+        padding: 0 !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+      }
+      .messenger-window {
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        border-radius: 0 !important;
+        border: none !important;
+      }
+      .sidebar {
+        width: 140px;
+        flex: 0 0 140px;
+        padding: 6px;
+      }
+      .profile-box { padding: 4px; gap: 4px; }
+      .profile-avatar { width: 32px; height: 32px; }
+      .rules { display: none; }
+      .toolbar { overflow-x: auto; padding: 2px 4px; }
+      .toolbar .btn { padding: 5px 8px; font-size: 11px; }
+      .status { display: none; }
+      .composer textarea { font-size: 14px; }
     }
-    @media(max-width:520px){
-      /* Keep the desktop sidebar visible on mobile too. */
-      .sidebar{
-        display:flex;
-        width:155px;
-        flex:0 0 155px;
-        padding:7px;
+
+    @media (max-width: 480px) {
+      .sidebar {
+        width: 115px;
+        flex: 0 0 115px;
       }
-      .profile-box{padding:6px;gap:6px}
-      .profile-avatar{width:38px;height:38px}
-      .side-title{margin:10px 3px 5px}
-      .contact{padding:6px 4px;font-size:11px}
-      .rules{font-size:9px;padding:6px}
-      .login-inner{padding:18px}
-      .login-head{gap:12px}
-      .login-logo{width:75px;height:75px}
-      .app-titlebar{height:34px}
-      .toolbar{padding:4px 6px}
-      .toolbar .btn{flex:0 0 auto}
-      .chat-header{height:auto;min-height:54px}
-      #messages{min-height:320px;padding:10px}
-      .msg{padding:8px}
-      .composer{align-items:stretch}
-      .composer textarea{
-        min-height:46px;
-        font-size:14px;
-      }
-      .composer .btn{align-self:stretch}
+      .side-title { font-size: 10px; margin: 8px 2px 3px; }
+      .contact { font-size: 10px; padding: 5px 3px; }
+      .chat-header { height: 44px; flex: 0 0 44px; padding: 6px 8px; }
+      .chat-header strong { font-size: 12px; }
+      .chat-header small { font-size: 9px; }
     }
   </style>
 </head>
@@ -117,7 +175,14 @@
 
 <section id="auth-screen" class="screen">
   <div class="card">
-    <div class="xp-titlebar"><span>APBn Squad Message Portal</span><div class="window-buttons"><span>_</span><span>□</span><span class="close">×</span></div></div>
+    <div class="xp-titlebar">
+      <span>APBn Squad Message Portal</span>
+      <div class="window-buttons">
+        <button type="button" class="btn-min" title="Minimize">_</button>
+        <button type="button" class="btn-max" title="Maximize">□</button>
+        <button type="button" class="close btn-close" title="Close">×</button>
+      </div>
+    </div>
     <div class="login-inner">
       <div class="login-head">
         <img class="login-logo" src="group-logo.png" alt="APBn Squad logo">
@@ -153,10 +218,14 @@
 </section>
 
 <section id="app" class="hidden">
-  <div class="messenger-window">
+  <div class="messenger-window" id="messenger-window">
     <div class="app-titlebar">
       <div class="app-title"><img class="mini-logo" src="group-logo.png" alt=""><span>APBn Squad Message Portal</span></div>
-      <div class="window-buttons"><span>_</span><span>□</span><span class="close">×</span></div>
+      <div class="window-buttons">
+        <button type="button" class="btn-min" id="win-min" title="Minimize">_</button>
+        <button type="button" class="btn-max" id="win-max" title="Maximize/Restore">□</button>
+        <button type="button" class="close btn-close" id="win-close" title="Close">×</button>
+      </div>
     </div>
     <div class="toolbar">
       <button class="btn secondary" id="account-toolbar">My account</button>
@@ -217,13 +286,10 @@
   "use strict";
 
   // ================================
-  // 1. PUT YOUR SUPABASE VALUES HERE
+  // 1. SUPABASE CONFIGURATION (INJECTED VIA GITHUB ACTIONS)
   // ================================
-  const SUPABASE_URL = "https://exhhtosvrgkvhjighjeg.supabase.co";
-  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_6woACdWWYM-GxotpgcZ5kA_ny_N8MAf";
-
-  // Supabase email/password auth is used internally. Users never see this
-  // synthetic address; they log in with their APBn username.
+  const SUPABASE_URL = "__SUPABASE_URL__";
+  const SUPABASE_PUBLISHABLE_KEY = "__SUPABASE_ANON_KEY__";
   const AUTH_DOMAIN = "apbn.local";
 
   const { createClient } = window.supabase;
@@ -233,6 +299,7 @@
   const authScreen = $("auth-screen"), app = $("app");
   const authStatus = $("auth-status"), messagesEl = $("messages");
   const input = $("message-input");
+  const winEl = $("messenger-window");
   let currentUser = null;
   let currentProfile = null;
   let replyTo = null;
@@ -240,9 +307,37 @@
 
   const usernameRegex = /^[A-Za-z]+@[0-9]+$/;
 
+  function setupWindowControls() {
+    const minBtn = $("win-min");
+    const maxBtn = $("win-max");
+    const closeBtn = $("win-close");
+
+    minBtn.onclick = () => {
+      winEl.classList.toggle("minimized");
+    };
+
+    maxBtn.onclick = () => {
+      winEl.classList.toggle("is-fullscreen");
+      app.classList.toggle("is-fullscreen-wrap");
+
+      if (winEl.classList.contains("is-fullscreen")) {
+        if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+      } else {
+        if (document.exitFullscreen && document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+    };
+
+    closeBtn.onclick = () => {
+      logout();
+    };
+  }
+  setupWindowControls();
+
   function authEmail(username) {
-    // Encode the APBn username so the internal Auth identifier is a valid
-    // single-at-sign email address. Example: alphabet@number -> <encoded>@apbn.local
     const bytes = new TextEncoder().encode(username.trim().toLowerCase());
     let binary = "";
     bytes.forEach(b => binary += String.fromCharCode(b));
@@ -268,7 +363,6 @@
 
   function formatText(s) {
     let safe = escapeHTML(s);
-    // Highlight @Name@123 tokens without making them executable HTML.
     safe = safe.replace(/(^|[\s])(@[A-Za-z]+@[0-9]+)\b/g, '$1<span class="mention">$2</span>');
     return safe;
   }
@@ -309,8 +403,6 @@
 
     $("signup-btn").disabled = true;
     try {
-      // This check improves the UX. The unique DB constraint remains the
-      // authoritative protection against duplicate usernames.
       const { data: existing, error: lookupError } = await sb
         .from("profiles")
         .select("id")
@@ -328,9 +420,6 @@
 
       if (error) throw error;
 
-      // With Confirm Email disabled in Supabase, a session is returned.
-      // If email confirmation is enabled, this synthetic address cannot
-      // receive mail, so this portal should use Confirm Email = OFF.
       if (!data.session) {
         showStatus("Account created, but Supabase email confirmation is enabled. Disable Confirm Email in Authentication settings for this username-only portal.");
       } else {
@@ -553,7 +642,6 @@
       const { data: { session } } = await sb.auth.getSession();
       if (!session) throw new Error("Your session has expired.");
 
-      // Edge Function verifies the caller's JWT and uses service_role only server-side.
       const { data, error } = await sb.functions.invoke("delete-account", {
         body: { confirm: true }
       });
@@ -628,9 +716,6 @@
   $("account-toolbar").onclick = () => $("account-modal").classList.remove("hidden");
   $("close-admin").onclick = () => $("admin-modal").classList.add("hidden");
 
-  // Account deletion is intentionally tucked behind the profile menu gesture:
-  // Ctrl/Cmd + click the username in this first version, or use the button below
-  // if you add a normal account menu later.
   $("who").style.cursor = "pointer";
   $("who").title = "Open account options";
   $("who").onclick = () => $("account-modal").classList.remove("hidden");
