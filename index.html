@@ -211,11 +211,18 @@
       .screen { padding: 0; }
       #app { padding: 0 !important; height: 100vh !important; height: 100dvh !important; }
       .messenger-window { width: 100vw !important; height: 100vh !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; }
-      .sidebar { width: 140px; flex: 0 0 140px; padding: 6px; }
-      .profile-box { padding: 4px; gap: 4px; }
-      .profile-avatar { width: 32px; height: 32px; }
-      .profile-popover { width: 220px; }
+      
+      /* MINIMIZED SIDEBAR LAYOUT FOR MOBILE */
+      .sidebar { width: 56px; flex: 0 0 56px; padding: 6px 4px; align-items: center; }
+      .profile-box { padding: 4px; justify-content: center; }
+      .profile-box > div { display: none; } /* Hide user text details */
+      .profile-avatar { width: 36px; height: 36px; }
+      .side-title { display: none; }
+      .contact { justify-content: center; padding: 6px 0; font-size: 0; }
+      .contact strong { display: none; }
       .rules { display: none; }
+
+      .profile-popover { width: 220px; }
       .toolbar { overflow-x: auto; padding: 2px 4px; }
       .toolbar .btn { padding: 5px 8px; font-size: 11px; }
       .status { display: none; }
@@ -714,258 +721,31 @@
       authScreen.classList.add("hidden");
       app.classList.remove("hidden");
       await loadMessages();
-      subscribeRealtime();
-    } catch (e) {
-      authScreen.classList.remove("hidden");
-      app.classList.add("hidden");
-      showStatus(e.message || "Could not load your account.");
+    } catch(e) {
+      if (e.message) showStatus(e.message);
     }
-  }
-
-  async function loadMessages() {
-    messagesEl.innerHTML = '<div class="empty">Loading messages…</div>';
-    const { data, error } = await sb.from("messages")
-      .select(`
-        id, user_id, content, created_at, deleted, reply_to,
-        profiles:user_id(id, username, display_name, avatar_url, bio, role)
-      `)
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      messagesEl.innerHTML = '<div class="empty">Could not load messages.</div>';
-      console.error(error);
-      return;
-    }
-
-    if (!data.length) {
-      messagesEl.innerHTML = '<div class="empty">No messages yet. Start the conversation.</div>';
-      return;
-    }
-
-    renderMessages(data);
-  }
-
-  function renderMessages(rows) {
-    messagesEl.innerHTML = "";
-    const byId = new Map(rows.map(r => [r.id, r]));
-
-    rows.forEach(row => {
-      const article = document.createElement("article");
-      article.className = "msg" + (row.user_id === currentUser.id ? " mine" : "") + (row.deleted ? " deleted" : "");
-
-      const profile = row.profiles || {};
-      const username = profile.username || "Unknown";
-      const displayName = profile.display_name || username;
-      const avatar = profile.avatar_url || "group-logo.png";
-      const isAdmin = profile.role === "admin";
-      const reply = row.reply_to ? byId.get(row.reply_to) : null;
-
-      let replyHTML = "";
-      if (reply) {
-        const replyProfile = reply.profiles || {};
-        const replyName = replyProfile.display_name || replyProfile.username || "Unknown";
-        replyHTML = `<div class="reply-line">Replying to <strong>${escapeHTML(replyName)}</strong>: ${reply.deleted ? "deleted message" : escapeHTML(reply.content.slice(0,120))}</div>`;
-      }
-
-      article.innerHTML = `
-        <img class="msg-avatar" src="${escapeHTML(avatar)}" alt="">
-        <div class="msg-content-wrap">
-          <div class="msg-head">
-            <span class="user-clickable">${escapeHTML(displayName)}</span>
-            <span style="font-size:10px;color:#6b7887">(@${escapeHTML(username)})</span>
-            ${isAdmin ? '<span class="role-badge admin" style="font-size:8px">Admin</span>' : ''}
-            <span class="time">${formatTime(row.created_at)}</span>
-          </div>
-          ${replyHTML}
-          <div class="body">${row.deleted ? '<span class="deleted-text">This message is deleted</span>' : formatText(row.content)}</div>
-          <div class="msg-tools">
-            ${!row.deleted ? '<button class="tiny reply-btn">Reply</button>' : ''}
-            ${!row.deleted && row.user_id === currentUser.id ? '<button class="tiny delete-msg-btn">Delete</button>' : ''}
-            ${!row.deleted && currentProfile?.role === "admin" ? '<button class="tiny delete-admin-btn">Remove</button>' : ''}
-          </div>
-        </div>
-      `;
-
-      // Floating Popover Events tied strictly to username & avatar elements
-      const usernameEl = article.querySelector(".user-clickable");
-      const avatarEl = article.querySelector(".msg-avatar");
-      if (usernameEl) attachChatUserEvents(usernameEl, profile);
-      if (avatarEl) attachChatUserEvents(avatarEl, profile);
-
-      const replyBtn = article.querySelector(".reply-btn");
-      if (replyBtn) replyBtn.onclick = () => startReply(row, username);
-
-      const del = article.querySelector(".delete-msg-btn");
-      if (del) del.onclick = () => softDeleteMessage(row.id);
-
-      const adminDel = article.querySelector(".delete-admin-btn");
-      if (adminDel) adminDel.onclick = () => adminDeleteMessage(row.id);
-
-      messagesEl.appendChild(article);
-    });
-
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function startReply(row, username) {
-    replyTo = row;
-    $("reply-banner").classList.remove("hidden");
-    $("reply-label").textContent = "Replying to @" + username;
-    input.value = `@${username} ` + input.value;
-    input.focus();
-  }
-
-  $("cancel-reply").onclick = () => {
-    replyTo = null;
-    $("reply-banner").classList.add("hidden");
-  };
-
-  async function sendMessage() {
-    const content = input.value.trim();
-    if (!content || !currentUser) return;
-
-    $("send-btn").disabled = true;
-    try {
-      const { error } = await sb.from("messages").insert({
-        user_id: currentUser.id,
-        content,
-        reply_to: replyTo?.id || null
-      });
-      if (error) throw error;
-      input.value = "";
-      replyTo = null;
-      $("reply-banner").classList.add("hidden");
-    } catch (e) {
-      alert(e.message || "Message could not be sent.");
-    } finally {
-      $("send-btn").disabled = false;
-    }
-  }
-
-  async function softDeleteMessage(id) {
-    if (!confirm("Delete this message?")) return;
-    const { error } = await sb.from("messages")
-      .update({ deleted: true, content: "[deleted]" })
-      .eq("id", id)
-      .eq("user_id", currentUser.id);
-
-    if (error) alert(error.message);
-  }
-
-  async function adminDeleteMessage(id) {
-    if (!confirm("Remove this message as an administrator?")) return;
-    const { error } = await sb.from("messages")
-      .update({ deleted: true, content: "[removed by administrator]" })
-      .eq("id", id);
-    if (error) alert(error.message);
-  }
-
-  function subscribeRealtime() {
-    if (realtimeChannel) sb.removeChannel(realtimeChannel);
-
-    realtimeChannel = sb.channel("apbn-message-feed")
-      .on("postgres_changes", {
-        event: "*",
-        schema: "public",
-        table: "messages"
-      }, () => loadMessages())
-      .subscribe();
-  }
-
-  async function logout() {
-    if (realtimeChannel) {
-      await sb.removeChannel(realtimeChannel);
-      realtimeChannel = null;
-    }
-    await sb.auth.signOut();
-  }
-
-  async function openAdmin() {
-    $("admin-modal").classList.remove("hidden");
-    await loadAdminUsers();
-  }
-
-  async function loadAdminUsers() {
-    const list = $("admin-list");
-    list.textContent = "Loading…";
-    const { data, error } = await sb.from("profiles")
-      .select("id,username,display_name,role,banned,ban_reason,created_at")
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      list.textContent = error.message;
-      return;
-    }
-
-    list.innerHTML = "";
-    data.forEach(p => {
-      const row = document.createElement("div");
-      row.className = "admin-row";
-      const name = p.display_name || p.username;
-      row.innerHTML = `
-        <div>
-          <strong>${escapeHTML(name)}</strong> <small>(@${escapeHTML(p.username)})</small>
-          <span class="role-badge ${p.role === "admin" ? "admin" : "member"}">${p.role}</span>
-          ${p.banned ? '<span class="role-badge" style="background:#ffcdd2;color:#b71c1c">BANNED</span>' : ''}
-        </div>
-        <button class="tiny ban-toggle">${p.banned ? "Unban" : "Ban"}</button>
-      `;
-
-      row.querySelector(".ban-toggle").onclick = async () => {
-        if (p.id === currentUser.id) {
-          alert("Do not ban your own admin account.");
-          return;
-        }
-        let reason = "";
-        if (!p.banned) {
-          reason = prompt("Ban reason (optional):", "Violation of APBn portal rules") || "";
-        }
-        const { error } = await sb.from("profiles")
-          .update({ banned: !p.banned, ban_reason: p.banned ? null : reason })
-          .eq("id", p.id);
-        if (error) alert(error.message);
-        else loadAdminUsers();
-      };
-
-      list.appendChild(row);
-    });
   }
 
   $("login-btn").onclick = login;
   $("signup-btn").onclick = createAccount;
-  $("send-btn").onclick = sendMessage;
-  $("logout-btn").onclick = logout;
-  $("admin-btn").onclick = openAdmin;
-  $("account-toolbar").onclick = () => $("account-modal").classList.remove("hidden");
-  $("close-admin").onclick = () => $("admin-modal").classList.add("hidden");
-  $("close-account").onclick = () => $("account-modal").classList.add("hidden");
 
-  input.addEventListener("keydown", e => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-
-  sb.auth.onAuthStateChange(async (event, session) => {
-    currentUser = session?.user || null;
-    if (currentUser) {
-      await enterApp();
+  sb.auth.onAuthStateChange((event, session) => {
+    if (session?.user) {
+      currentUser = session.user;
+      enterApp();
     } else {
+      currentUser = null;
       currentProfile = null;
       app.classList.add("hidden");
       authScreen.classList.remove("hidden");
-      switchAuth("login");
     }
   });
 
-  (async () => {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      currentUser = session.user;
-      await enterApp();
-    }
-  })();
+  async function logout() {
+    await sb.auth.signOut();
+  }
+
+  $("logout-btn").onclick = logout;
 })();
 </script>
 </body>
