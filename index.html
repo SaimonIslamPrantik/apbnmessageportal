@@ -1,972 +1,302 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100 dark">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#111111">
-  <title>APBn Squad Message Portal</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    :root{
-      --xp-blue:#1769d1; --xp-blue-dark:#0b3d91; --xp-blue-lite:#5ca7ff;
-      --xp-bg:#dcecff; --xp-panel:#f6fbff; --xp-border:#6d89a8;
-      --xp-green:#2aa84a; --black:#000; --text:#111; --muted:#566579;
-      --red:#c60000;
+    .autohide-target {
+      transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
     }
-    *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      padding:0;
-      width:100%;
-      height:100%;
-      min-height:100vh;
-      color:var(--text);
-      background:
-        radial-gradient(ellipse at 18% 85%, rgba(18,125,112,.95) 0%, rgba(18,125,112,.55) 18%, transparent 43%),
-        radial-gradient(ellipse at 82% 18%, rgba(36,113,191,.92) 0%, rgba(20,77,143,.68) 28%, transparent 58%),
-        radial-gradient(ellipse at 48% 55%, rgba(24,174,164,.52) 0%, transparent 42%),
-        linear-gradient(135deg,#041c3d 0%,#063d72 38%,#087b86 67%,#082f52 100%);
-      background-attachment:fixed;
+    .autohide-target.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
     }
-    body{font-family:Tahoma,Verdana,Arial,sans-serif;overflow:hidden}
-    button,input,textarea{font:inherit} button{cursor:pointer}.hidden{display:none!important}
-
-    .screen{
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      padding:16px;
-      background:
-        radial-gradient(ellipse 70% 24% at 52% 72%, rgba(132,255,214,.30) 0%, rgba(45,191,170,.18) 35%, transparent 70%),
-        radial-gradient(ellipse 42% 80% at 78% 35%, rgba(73,165,255,.30) 0%, transparent 72%),
-        linear-gradient(145deg,#03142f 0%,#064b7d 42%,#07858c 70%,#062c50 100%);
-      background-attachment:fixed;
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
-    .card{width:min(430px,100%);background:linear-gradient(#f9fcff,#dbe9f8);border:1px solid #526b88;border-radius:8px;box-shadow:0 0 0 1px #dce8f4,0 14px 50px #000;overflow:hidden;padding:0}
-    .xp-titlebar{height:31px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;color:#fff;font-weight:bold;font-size:12px;background:linear-gradient(#65adff 0,#2679dd 42%,#0b4ba7 100%);border-bottom:1px solid #0a3678;text-shadow:1px 1px #16457c;user-select:none}
-    
-    .window-buttons{display:flex;gap:3px}
-    .window-buttons button{
-      width:20px;
-      height:19px;
-      display:grid;
-      place-items:center;
-      border:1px solid #bcd5f3;
-      border-radius:3px;
-      background:linear-gradient(#6eb4ff,#1663be);
-      color:#fff;
-      font-size:11px;
-      font-weight:bold;
-      padding:0;
-      line-height:1;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,0.4);
-    }
-    .window-buttons button:hover{filter:brightness(1.15)}
-    .window-buttons button:active{filter:brightness(0.85)}
-    .window-buttons button.close{background:linear-gradient(#ff7b70,#b9150d);border-color:#ffd0cc}
-
-    .login-inner{padding:20px 24px 22px}.login-head{display:flex;gap:18px;align-items:center;margin-bottom:15px}.login-logo{width:90px;height:90px;border-radius:9px;border:1px solid #91a8bf;background:#fff;object-fit:contain;box-shadow:0 2px 5px #66778855}.login-title h1{font:700 21px Tahoma,Verdana,sans-serif;margin:0 0 4px;color:#173a68;text-transform:none;text-shadow:none}.login-title p{margin:0;color:#5c6f84;font-size:12px}.sub{color:#5d6d7e;margin:0 0 16px;font-size:12px}
-    label{display:block;color:#23384d;font-size:12px;margin:11px 0 5px}input,textarea{width:100%;background:#fff;color:#111;border:1px solid #8197ad;border-radius:2px;padding:8px 9px;outline:none;box-shadow:inset 0 1px 2px #8899aa44}input:focus,textarea:focus{border-color:#347dcc;box-shadow:0 0 0 1px #76aee8}.btn{border:1px solid #315f91;border-radius:3px;padding:7px 14px;background:linear-gradient(#fff,#d9e7f5 48%,#b7cde4);color:#102d4b;font-weight:bold;font-size:12px;box-shadow:inset 0 1px #fff,0 1px 2px #0003}.btn:hover{filter:brightness(1.04)}.btn.secondary{background:linear-gradient(#fff,#e7eef5 48%,#cbd9e7);color:#21384f}.btn.danger{background:linear-gradient(#fff,#ffdede 48%,#f0a9a9);color:#7c0000;border-color:#a55}.btn.full{width:100%;margin-top:14px}.switch{margin-top:15px;text-align:center;color:#5c6d80;font-size:11px}.switch button{background:none;border:0;color:#064fa9;text-decoration:underline;padding:0}.error,.ok{margin-top:12px;padding:8px;border-radius:3px;font-size:11px}.error{background:#ffe2e2;border:1px solid #cf8d8d;color:#8a0000}.ok{background:#e1f5e5;border:1px solid #8abf93;color:#126022}
-
-    #app{
-      height:100vh;
-      height:100dvh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-      background:
-        radial-gradient(ellipse 70% 24% at 52% 72%, rgba(132,255,214,.30) 0%, rgba(45,191,170,.18) 35%, transparent 70%),
-        radial-gradient(ellipse 42% 80% at 78% 35%, rgba(73,165,255,.30) 0%, transparent 72%),
-        linear-gradient(145deg,#03142f 0%,#064b7d 42%,#07858c 70%,#062c50 100%);
-      background-attachment:fixed;
-      transition:all 0.2s ease-in-out;
-    }
-
-    .messenger-window{
-      width:min(980px, 100%);
-      height:min(760px, calc(100vh - 36px));
-      display:flex;
-      flex-direction:column;
-      background:#edf4fc;
-      border:1px solid #476481;
-      border-radius:8px;
-      box-shadow:0 0 0 1px #b7c9db,0 18px 70px #000;
-      overflow:hidden;
-      position:relative;
-      transition:all 0.2s ease-in-out;
-    }
-
-    .messenger-window.minimized .workspace,
-    .messenger-window.minimized .toolbar {
-      display:none !important;
-    }
-    .messenger-window.minimized {
-      height:34px !important;
-      min-height:34px !important;
-      align-self:flex-end;
-    }
-
-    .messenger-window.is-fullscreen {
-      width:100vw !important;
-      height:100vh !important;
-      height:100dvh !important;
-      max-width:none !important;
-      max-height:none !important;
-      border-radius:0 !important;
-      border:none !important;
-    }
-
-    #app.is-fullscreen-wrap {
-      padding:0 !important;
-    }
-
-    .app-titlebar{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;color:#fff;font-weight:bold;font-size:12px;background:linear-gradient(#63adff,#277bdd 45%,#0a4aa4);border-bottom:1px solid #123b70;text-shadow:1px 1px #1d4b80;user-select:none}.app-title{display:flex;align-items:center;gap:7px}.mini-logo{width:22px;height:22px;border-radius:3px;background:#fff;object-fit:contain;border:1px solid #adc3dc}
-    .toolbar{height:38px;flex:0 0 38px;display:flex;align-items:center;gap:6px;padding:4px 8px;background:linear-gradient(#fff,#e3edf7);border-bottom:1px solid #a5b8cb}.toolbar .sep{height:23px;width:1px;background:#b7c4d1;margin:0 3px}.status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:#4a5f74}.status-dot{width:9px;height:9px;border-radius:50%;background:var(--xp-green);border:1px solid #176b2d}
-    .workspace{flex:1;min-height:0;display:flex;background:#fff;overflow:hidden;position:relative}
-    .sidebar{width:230px;flex:0 0 230px;background:linear-gradient(90deg,#eaf3fc,#d8e8f8);border-right:1px solid #9cafc3;padding:9px;display:flex;flex-direction:column;overflow-y:auto;position:relative}
-
-    /* SIDEBAR PROFILE CARD */
-    .profile-box{
-      display:flex;
-      gap:8px;
-      padding:8px;
-      background:linear-gradient(#fff,#e4edf6);
-      border:1px solid #a5b6c7;
-      border-radius:4px;
-      box-shadow:inset 0 1px #fff;
-      cursor:pointer;
-      position:relative;
-      transition:all 0.15s ease-in-out;
-    }
-    .profile-box:hover{
-      background:linear-gradient(#ffffff,#dbe8f5);
-      border-color:#347dcc;
-      box-shadow:0 0 6px rgba(39,123,221,0.3);
-    }
-    .profile-avatar{width:44px;height:44px;border:1px solid #91a6ba;background:#fff;border-radius:4px;object-fit:cover}
-    .profile-name{font-weight:bold;color:#1d426c;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .profile-subname{font-size:10px;color:#5a6e85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .profile-state{font-size:11px;color:#2b7a3b;margin-top:2px;display:flex;align-items:center;gap:4px}
-
-    /* FIXED FLOATING PROFILE POPOVER CARD */
-    .profile-popover{
-      position:fixed;
-      width:250px;
-      background:linear-gradient(#f8fcff,#e2edf8);
-      border:1px solid #4a6c8e;
-      border-radius:6px;
-      box-shadow:0 8px 24px rgba(0,0,0,0.4);
-      padding:12px;
-      z-index:9999;
-      display:none;
-      flex-direction:column;
-      gap:8px;
-      pointer-events:auto;
-    }
-    .profile-popover.show{display:flex}
-    .popover-head{display:flex;gap:10px;align-items:center}
-    .popover-avatar{width:50px;height:50px;border-radius:4px;border:1px solid #7d96af;object-fit:cover;background:#fff}
-    .popover-details{flex:1;min-width:0}
-    .popover-title{font-weight:bold;font-size:13px;color:#0d325c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .popover-handle{font-size:11px;color:#5a6e85}
-    .popover-bio{font-size:11px;color:#334455;background:#ffffffa0;padding:6px;border:1px solid #b2c4d6;border-radius:3px;margin-top:4px;white-space:pre-wrap;word-break:break-word}
-
-    /* BADGES */
-    .role-badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:10px;font-size:9px;font-weight:bold;text-transform:uppercase;margin-top:3px}
-    .role-badge.admin{background:linear-gradient(#ffe082,#f57c00);color:#4a2800;border:1px solid #b35900;text-shadow:0 1px 0 rgba(255,255,255,0.4)}
-    .role-badge.member{background:linear-gradient(#e0e0e0,#9e9e9e);color:#212121;border:1px solid #616161}
-
-    .side-title{font-weight:bold;font-size:11px;color:#40566c;margin:12px 4px 5px}.contact{display:flex;gap:7px;align-items:center;padding:7px 6px;border-radius:3px;font-size:12px;color:#314a62}.contact.active{background:linear-gradient(#fff,#d6e7f8);border:1px solid #a6bdd5}.contact-dot{width:10px;height:10px;border-radius:50%;background:#3aaa55;border:1px solid #1b7330}.rules{margin-top:auto;font-size:10px;line-height:1.45;color:#5c6b79;background:#eef5fb;border:1px solid #b8c7d6;padding:7px;border-radius:3px}
-    main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;background:#fff;position:relative}.chat-header{height:54px;flex:0 0 54px;background:linear-gradient(#fff,#e4edf6);border-bottom:1px solid #a9bacb;padding:8px 12px}.chat-header strong{font-size:14px;color:#173c64}.chat-header small{display:block;color:#6b7887;font-size:10px;margin-top:2px}
-    #messages{flex:1;overflow-y:auto;padding:12px 14px;background:#fff;scrollbar-color:#9aaabc #edf2f7;position:relative}
-    .msg{position:relative;margin:0 0 8px;padding:8px 10px;background:#fff;border-bottom:1px solid #d8e0e8;display:flex;gap:10px;align-items:flex-start}
-    .msg.mine{background:#f3f8fd;border-left:3px solid #4d91d8}.msg.deleted{opacity:.72}
-    .msg-avatar{width:36px;height:36px;border-radius:4px;border:1px solid #9aaabc;object-fit:cover;cursor:pointer;flex-shrink:0;margin-top:2px}
-    .msg-avatar:hover{filter:brightness(1.1)}
-    .msg-content-wrap{flex:1;min-width:0}
-    .msg-head{display:flex;align-items:center;gap:7px;margin-bottom:2px}
-    
-    /* CHAT USERNAME HOVER STYLE */
-    .user-clickable{
-      font-weight:bold;
-      color:#144f8f;
-      font-size:12px;
-      cursor:pointer;
-      text-decoration:none;
-      transition:all 0.15s ease;
-      display:inline-block;
-    }
-    .user-clickable:hover{
-      color:#004085;
-      text-decoration:underline;
-    }
-
-    .time{font-size:10px;color:#7a8794}.body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;color:#1b1b1b}.deleted-text{font-style:italic;color:#7b8793}.mention{color:#065db3;font-weight:bold}.reply-line{font-size:10px;color:#667787;border-left:2px solid #8fb5dc;padding-left:7px;margin-bottom:5px}.msg-tools{display:flex;justify-content:flex-end;gap:5px;margin-top:5px}.tiny{border:1px solid #9aaabd;background:linear-gradient(#fff,#e3eaf1);color:#2a4056;border-radius:2px;padding:3px 7px;font-size:10px}.tiny:hover{background:#dcecff}
-    #composer-wrap{padding:7px 10px 9px;background:linear-gradient(#edf4fb,#d7e6f4);border-top:1px solid #a7b8ca}.reply-banner{max-width:none;margin:0 0 5px;background:#fff7cf;border:1px solid #dfca79;padding:5px 8px;border-radius:2px;font-size:10px;color:#655522;display:flex;justify-content:space-between}.composer{display:flex;gap:6px;align-items:flex-end}.composer textarea{flex:1;min-height:42px;max-height:100px}
-    .modal{position:fixed;inset:0;background:#0009;display:grid;place-items:center;padding:20px;z-index:10000}.modal .card{max-height:90vh;overflow:auto;padding:16px}.admin-row{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid #d2dce6}
-    .empty{text-align:center;color:#7b8792;padding:50px 10px;font-size:12px}
-
-    @media (max-width: 768px) {
-      body { overflow: hidden; }
-      .screen { padding: 0; }
-      #app { padding: 0 !important; height: 100vh !important; height: 100dvh !important; }
-      .messenger-window { width: 100vw !important; height: 100vh !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; }
-      .sidebar { width: 140px; flex: 0 0 140px; padding: 6px; }
-      .profile-box { padding: 4px; gap: 4px; }
-      .profile-avatar { width: 32px; height: 32px; }
-      .profile-popover { width: 220px; }
-      .rules { display: none; }
-      .toolbar { overflow-x: auto; padding: 2px 4px; }
-      .toolbar .btn { padding: 5px 8px; font-size: 11px; }
-      .status { display: none; }
-      .composer textarea { font-size: 14px; }
+    .animate-toast {
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
   </style>
 </head>
-<body>
+<body class="h-full overflow-hidden font-sans antialiased selection:bg-brand-500 selection:text-white" onclick="requestNotificationPermission()">
 
-<section id="auth-screen" class="screen">
-  <div class="card">
-    <div class="xp-titlebar">
-      <span>APBn Squad Message Portal</span>
-      <div class="window-buttons">
-        <button type="button" class="btn-min" title="Minimize">_</button>
-        <button type="button" class="btn-max" title="Maximize">□</button>
-        <button type="button" class="close btn-close" title="Close">×</button>
-      </div>
-    </div>
-    <div class="login-inner">
-      <div class="login-head">
-        <img class="login-logo" src="group-logo.png" alt="APBn Squad logo">
-        <div class="login-title"><h1>APBn Squad</h1><p>Message Portal</p></div>
-      </div>
+  <!-- Toast Notification Container (In-App) -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
-      <div id="login-box">
-        <h2 style="margin:0 0 4px;color:#173a68;font-size:18px">Sign in</h2>
-        <p class="sub">Enter your APBn account to continue.</p>
-        <label for="login-username">Username</label>
-        <input id="login-username" autocomplete="username" placeholder="alphabet@number">
-        <label for="login-password">Password</label>
-        <input id="login-password" type="password" autocomplete="current-password" placeholder="Password">
-        <button class="btn full" id="login-btn">Sign in</button>
-        <div class="switch">New to the portal? <button id="show-signup">Create an account</button></div>
-      </div>
+  <div class="flex h-full w-full overflow-hidden">
 
-      <div id="signup-box" class="hidden">
-        <h2 style="margin:0 0 4px;color:#173a68;font-size:18px">Create account</h2>
-        <p class="sub">Username format: alphabet@number.</p>
-        <label for="signup-username">Username</label>
-        <input id="signup-username" autocomplete="username" placeholder="alphabet@number">
-        <label for="signup-password">Password</label>
-        <input id="signup-password" type="password" autocomplete="new-password" placeholder="Minimum 6 characters">
-        <label for="signup-password2">Confirm password</label>
-        <input id="signup-password2" type="password" autocomplete="new-password" placeholder="Repeat password">
-        <button class="btn full" id="signup-btn">Create account</button>
-        <div class="switch">Already registered? <button id="show-login">Sign in</button></div>
-      </div>
-      <div id="auth-status"></div>
-    </div>
-  </div>
-</section>
-
-<section id="app" class="hidden">
-  <div class="messenger-window" id="messenger-window">
-    <div class="app-titlebar">
-      <div class="app-title"><img class="mini-logo" src="group-logo.png" alt=""><span>APBn Squad Message Portal</span></div>
-      <div class="window-buttons">
-        <button type="button" class="btn-min" id="win-min" title="Minimize">_</button>
-        <button type="button" class="btn-max" id="win-max" title="Maximize/Restore">□</button>
-        <button type="button" class="close btn-close" id="win-close" title="Close">×</button>
-      </div>
-    </div>
-    <div class="toolbar">
-      <button class="btn secondary" id="account-toolbar">My account</button>
-      <button class="btn secondary" id="admin-btn">Admin</button>
-      <button class="btn secondary" id="logout-btn">Sign out</button>
-      <div class="sep"></div><div class="status"><span class="status-dot"></span>Online</div>
-    </div>
-    <div class="workspace">
-      <aside class="sidebar">
-        <!-- SIDEBAR PROFILE CARD -->
-        <div class="profile-box" id="profile-box">
-          <img class="profile-avatar" id="sidebar-avatar" src="group-logo.png" alt="">
-          <div style="min-width:0;flex:1">
-            <div class="profile-name" id="who">User</div>
-            <div class="profile-subname" id="subwho">@user</div>
-            <div class="profile-state"><span class="status-dot"></span>Online</div>
+    <!-- Left Profile & Navigation Panel -->
+    <aside id="left-panel" class="group/sidebar relative flex flex-col border-r border-slate-800 bg-slate-900/80 backdrop-blur-md transition-all duration-300 ease-in-out z-30 w-16 md:w-80 shrink-0">
+      
+      <!-- Panel Header / User Profile -->
+      <div class="p-3 md:p-4 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div class="relative shrink-0">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="w-10 h-10 rounded-full object-cover ring-2 ring-brand-500/50">
+            <span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-slate-900"></span>
+          </div>
+          <div class="hidden md:block truncate min-w-0">
+            <h2 class="font-semibold text-sm text-slate-100 truncate">Alex Rivera</h2>
+            <p class="text-xs text-slate-400 truncate">Available</p>
           </div>
         </div>
 
-        <div class="side-title">SQUAD</div>
-        <div class="contact active"><span class="contact-dot"></span><strong>APBn Squad</strong></div>
-        <div class="side-title">PORTAL</div>
-        <div class="contact">● Group messages</div>
-        <div class="contact">● Replies & mentions</div>
-        <div class="rules"><strong>Portal rules</strong><br>Keep messages appropriate. Administrators may remove messages or ban accounts for rule violations.</div>
-      </aside>
-      <main>
-        <div class="chat-header"><strong>APBn Squad</strong><small>Group message conversation · Real-time</small></div>
-        <div id="messages"><div class="empty">Loading messages…</div></div>
-        <div id="composer-wrap">
-          <div id="reply-banner" class="reply-banner hidden"><span id="reply-label"></span><button class="tiny" id="cancel-reply">Cancel</button></div>
-          <div class="composer">
-            <textarea id="message-input" maxlength="2000" placeholder="Type a squad message… Use Reply to tag a user."></textarea>
-            <button class="btn" id="send-btn">Send</button>
+        <button id="toggle-sidebar-btn" onclick="toggleSidebar()" class="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded-lg transition-colors">
+          <svg id="sidebar-icon-expand" class="w-5 h-5 md:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+          <svg id="sidebar-icon-collapse" class="w-5 h-5 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+        </button>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="p-2 border-b border-slate-800 flex justify-around md:justify-start md:gap-1">
+        <button class="p-2.5 text-brand-500 bg-brand-500/10 rounded-xl transition-colors relative">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        </button>
+        <button onclick="requestNotificationPermission(true)" title="Enable System Notifications" class="p-2.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-xl transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        </button>
+      </div>
+
+      <!-- Conversations List -->
+      <div class="flex-1 overflow-y-auto p-2 space-y-1">
+        <div onclick="selectChat(1)" class="chat-item flex items-center gap-3 p-2.5 rounded-xl bg-slate-800/80 cursor-pointer transition-colors relative">
+          <div class="relative shrink-0">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" class="w-10 h-10 rounded-full object-cover">
+            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-slate-900"></span>
+          </div>
+          <div class="hidden md:block flex-1 min-w-0">
+            <div class="flex justify-between items-baseline">
+              <h3 class="text-sm font-medium text-slate-100 truncate">Sarah Jenkins</h3>
+              <span class="text-[10px] text-slate-400">12:42 PM</span>
+            </div>
+            <p class="text-xs text-slate-400 truncate">Sounds good, let me know when...</p>
           </div>
         </div>
-      </main>
-    </div>
-  </div>
 
-  <!-- SINGLE REUSABLE FLOATING POPOVER CARD -->
-  <div class="profile-popover" id="profile-popover">
-    <div class="popover-head">
-      <img class="popover-avatar" id="popover-avatar" src="group-logo.png" alt="">
-      <div class="popover-details">
-        <div class="popover-title" id="popover-display-name">Display Name</div>
-        <div class="popover-handle" id="popover-username">@username</div>
-        <div id="popover-badge"></div>
+        <div onclick="selectChat(2)" class="chat-item flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-800/50 cursor-pointer transition-colors relative">
+          <div class="relative shrink-0">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" class="w-10 h-10 rounded-full object-cover">
+            <span id="unread-badge-2" class="hidden absolute -top-1 -right-1 bg-brand-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-2 ring-slate-900">1</span>
+          </div>
+          <div class="hidden md:block flex-1 min-w-0">
+            <div class="flex justify-between items-baseline">
+              <h3 class="text-sm font-medium text-slate-100 truncate">David Chen</h3>
+              <span class="text-[10px] text-slate-400">11:15 AM</span>
+            </div>
+            <p class="text-xs text-slate-400 truncate">Can you send the design tokens?</p>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="popover-bio" id="popover-bio">No bio added yet.</div>
-    <button class="btn full" id="popover-edit-btn" style="margin-top:4px;padding:5px">Edit Profile</button>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main id="chat-workspace" class="flex-1 flex flex-col h-full bg-slate-950 relative overflow-hidden">
+
+      <header id="autohide-header" class="autohide-target absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-4 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" class="w-9 h-9 rounded-full object-cover">
+          <div>
+            <h2 class="text-sm font-semibold text-slate-100">Sarah Jenkins</h2>
+            <p class="text-xs text-emerald-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Active now
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="triggerSimulatedMessage()" class="px-3 py-1.5 text-xs font-medium bg-brand-600 hover:bg-brand-500 text-white rounded-lg transition-colors">
+            Simulate Incoming Msg
+          </button>
+        </div>
+      </header>
+
+      <div id="messages-container" class="flex-1 overflow-y-auto p-6 pt-20 pb-24 space-y-4">
+        <div class="flex justify-center">
+          <span class="text-[11px] text-slate-500 bg-slate-900 px-3 py-1 rounded-full border border-slate-800">Today</span>
+        </div>
+
+        <div class="flex items-start gap-3 max-w-lg">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" class="w-8 h-8 rounded-full object-cover">
+          <div class="bg-slate-800 text-slate-200 p-3.5 rounded-2xl rounded-tl-sm text-sm border border-slate-700/50 shadow-sm">
+            Hey! Are you working on the dark mode update today?
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 max-w-lg ml-auto flex-row-reverse">
+          <div class="bg-brand-600 text-white p-3.5 rounded-2xl rounded-tr-sm text-sm shadow-sm">
+            Yes, setting up the auto-hiding navigation and profile drawer right now!
+          </div>
+        </div>
+      </div>
+
+      <div id="autohide-footer" class="autohide-target absolute bottom-0 left-0 right-0 z-20 p-4 bg-slate-900/90 backdrop-blur-md border-t border-slate-800">
+        <form onsubmit="sendMessage(event)" class="flex items-center gap-2 max-w-4xl mx-auto">
+          <input type="text" id="message-input" placeholder="Type a message..." class="flex-1 bg-slate-950 text-slate-100 text-sm px-4 py-3 rounded-xl border border-slate-800 focus:outline-none focus:border-brand-500 transition-colors">
+          <button type="submit" class="p-3 bg-brand-600 hover:bg-brand-500 text-white rounded-xl transition-colors shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+          </button>
+        </form>
+      </div>
+
+    </main>
   </div>
-</section>
 
-<!-- EDIT PROFILE MODAL -->
-<div id="edit-profile-modal" class="modal hidden">
-  <div class="card">
-    <h2 style="margin:0 0 4px;color:#173a68;font-size:18px">Edit Profile</h2>
-    <p class="sub">Update your personal details visible to the squad.</p>
-    
-    <label for="edit-display-name">Display Name</label>
-    <input id="edit-display-name" placeholder="e.g. Commander Alex">
-    
-    <label for="edit-avatar-url">Avatar Image URL</label>
-    <input id="edit-avatar-url" placeholder="https://example.com/avatar.png">
-    
-    <label for="edit-bio">Bio</label>
-    <textarea id="edit-bio" rows="3" placeholder="Tell the squad about yourself..."></textarea>
-    
-    <button class="btn full" id="save-profile-btn">Save Changes</button>
-    <button class="btn secondary full" id="close-profile-modal" style="margin-top:6px">Cancel</button>
-  </div>
-</div>
+  <script>
+    /* Feature 1: Cursor Auto-Hide Logic */
+    const workspace = document.getElementById('chat-workspace');
+    const autohideElements = [
+      document.getElementById('autohide-header'),
+      document.getElementById('autohide-footer')
+    ];
+    let idleTimeout = null;
 
-<div id="admin-modal" class="modal hidden">
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-      <div><h2>Admin</h2><p class="sub">Manage squad accounts.</p></div>
-      <button class="tiny" id="close-admin">Close</button>
-    </div>
-    <div id="admin-list">Loading…</div>
-  </div>
-</div>
+    function hideUI() {
+      if (document.activeElement === document.getElementById('message-input')) return;
+      autohideElements.forEach(el => el && el.classList.add('is-hidden'));
+    }
 
-<div id="account-modal" class="modal hidden">
-  <div class="card">
-    <h2>Account Settings</h2>
-    <p class="sub">Deleting your account permanently removes the account and its messages.</p>
-    <button class="btn danger full" id="delete-account-btn">Delete my account</button>
-    <button class="btn secondary full" id="close-account" style="margin-top:6px">Cancel</button>
-  </div>
-</div>
+    function showUI() {
+      autohideElements.forEach(el => el && el.classList.remove('is-hidden'));
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-(() => {
-  "use strict";
+    workspace.addEventListener('mouseleave', () => hideUI());
+    workspace.addEventListener('mouseenter', () => showUI());
+    workspace.addEventListener('touchstart', () => {
+      showUI();
+      clearTimeout(idleTimeout);
+      idleTimeout = setTimeout(() => hideUI(), 3500);
+    });
 
-  // ================================
-  // 1. SUPABASE CONFIGURATION
-  // ================================
-  const SUPABASE_URL = "__SUPABASE_URL__";
-  const SUPABASE_PUBLISHABLE_KEY = "__SUPABASE_ANON_KEY__";
-  const AUTH_DOMAIN = "apbn.local";
+    /* Feature 2: Mobile Drawer State */
+    let isExpanded = false;
+    const sidebar = document.getElementById('left-panel');
 
-  const { createClient } = window.supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-
-  const $ = id => document.getElementById(id);
-  const authScreen = $("auth-screen"), app = $("app");
-  const authStatus = $("auth-status"), messagesEl = $("messages");
-  const input = $("message-input");
-  const winEl = $("messenger-window");
-  let currentUser = null;
-  let currentProfile = null;
-  let replyTo = null;
-  let realtimeChannel = null;
-  let popoverTimeout = null;
-
-  const usernameRegex = /^[A-Za-z]+@[0-9]+$/;
-
-  function setupWindowControls() {
-    $("win-min").onclick = () => winEl.classList.toggle("minimized");
-    $("win-max").onclick = () => {
-      winEl.classList.toggle("is-fullscreen");
-      app.classList.toggle("is-fullscreen-wrap");
-      if (winEl.classList.contains("is-fullscreen")) {
-        if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => {});
-        }
+    function toggleSidebar() {
+      isExpanded = !isExpanded;
+      if (isExpanded) {
+        sidebar.classList.remove('w-16');
+        sidebar.classList.add('w-72', 'md:w-80');
+        document.querySelectorAll('.chat-item > div:nth-child(2)').forEach(el => el.classList.remove('hidden'));
       } else {
-        if (document.exitFullscreen && document.fullscreenElement) {
-          document.exitFullscreen().catch(() => {});
-        }
+        sidebar.classList.remove('w-72', 'md:w-80');
+        sidebar.classList.add('w-16');
+        document.querySelectorAll('.chat-item > div:nth-child(2)').forEach(el => el.classList.add('hidden'));
       }
-    };
-    $("win-close").onclick = () => logout();
-  }
-  setupWindowControls();
-
-  function authEmail(username) {
-    const bytes = new TextEncoder().encode(username.trim().toLowerCase());
-    let binary = "";
-    bytes.forEach(b => binary += String.fromCharCode(b));
-    const encoded = btoa(binary).replace(/=+$/g, "").replace(/\+/g, "-").replace(/\//g, "_");
-    return encoded + "@" + AUTH_DOMAIN;
-  }
-
-  function showStatus(message, good=false) {
-    authStatus.className = good ? "ok" : "error";
-    authStatus.textContent = message;
-  }
-
-  function clearStatus() {
-    authStatus.className = "";
-    authStatus.textContent = "";
-  }
-
-  function escapeHTML(s) {
-    return String(s || "").replace(/[&<>"']/g, c => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[c]));
-  }
-
-  function formatText(s) {
-    let safe = escapeHTML(s);
-    safe = safe.replace(/(^|[\s])(@[A-Za-z]+@[0-9]+)\b/g, '$1<span class="mention">$2</span>');
-    return safe;
-  }
-
-  function formatTime(value) {
-    return new Intl.DateTimeFormat(undefined, {
-      dateStyle: "medium", timeStyle: "short"
-    }).format(new Date(value));
-  }
-
-  function switchAuth(mode) {
-    $("login-box").classList.toggle("hidden", mode !== "login");
-    $("signup-box").classList.toggle("hidden", mode !== "signup");
-    clearStatus();
-  }
-
-  $("show-signup").onclick = () => switchAuth("signup");
-  $("show-login").onclick = () => switchAuth("login");
-
-  async function createAccount() {
-    clearStatus();
-    const username = $("signup-username").value.trim();
-    const password = $("signup-password").value;
-    const password2 = $("signup-password2").value;
-
-    if (!usernameRegex.test(username)) {
-      showStatus("Username must look like alphabet@number — letters before @ and numbers after it.");
-      return;
-    }
-    if (password.length < 6) {
-      showStatus("Password must be at least 6 characters.");
-      return;
-    }
-    if (password !== password2) {
-      showStatus("Passwords do not match.");
-      return;
     }
 
-    $("signup-btn").disabled = true;
-    try {
-      const { data: existing, error: lookupError } = await sb
-        .from("profiles")
-        .select("id")
-        .eq("username_normalized", username.toLowerCase())
-        .maybeSingle();
-
-      if (lookupError) throw lookupError;
-      if (existing) throw new Error("That username already exists.");
-
-      const { data, error } = await sb.auth.signUp({
-        email: authEmail(username),
-        password,
-        options: { data: { username } }
-      });
-
-      if (error) throw error;
-
-      if (!data.session) {
-        showStatus("Account created, but email confirmation is enabled on Supabase.");
-      } else {
-        showStatus("Account created. You can now sign in.", true);
-        switchAuth("login");
-        $("login-username").value = username;
+    /* Feature 3: Dual In-App + Browser Native Notifications */
+    function requestNotificationPermission(userTriggered = false) {
+      if (!("Notification" in window)) return;
+      if (Notification.permission === "default") {
+        Notification.requestPermission();
+      } else if (userTriggered && Notification.permission === "granted") {
+        showInAppToast("Notifications Active", "Browser system notifications are already enabled.");
       }
-    } catch (e) {
-      showStatus(e.message || "Could not create account.");
-    } finally {
-      $("signup-btn").disabled = false;
-    }
-  }
-
-  async function login() {
-    clearStatus();
-    const username = $("login-username").value.trim();
-    const password = $("login-password").value;
-
-    if (!usernameRegex.test(username)) {
-      showStatus("Enter a username like alphabet@number.");
-      return;
-    }
-    if (!password) {
-      showStatus("Enter your password.");
-      return;
     }
 
-    $("login-btn").disabled = true;
-    try {
-      const { error } = await sb.auth.signInWithPassword({
-        email: authEmail(username),
-        password
-      });
-      if (error) throw error;
-    } catch (e) {
-      showStatus("Login failed. Check your username and password.");
-    } finally {
-      $("login-btn").disabled = false;
-    }
-  }
+    function sendBrowserNotification(sender, message, avatarUrl) {
+      if (!("Notification" in window)) return;
 
-  // ================================
-  // DIRECT TARGET FLOATING PROFILE POPOVER LOGIC
-  // ================================
-  function setupProfileEvents() {
-    const popover = $("profile-popover");
-    const sidebarBox = $("profile-box");
+      if (Notification.permission === "granted") {
+        const notification = new Notification(`New message from ${sender}`, {
+          body: message,
+          icon: avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
+          badge: avatarUrl,
+          tag: 'chat-message'
+        });
 
-    sidebarBox.addEventListener("mouseenter", (e) => showPopoverForProfile(currentProfile, sidebarBox));
-    sidebarBox.addEventListener("mouseleave", schedulePopoverHide);
-    sidebarBox.addEventListener("click", (e) => {
-      e.stopPropagation();
-      showPopoverForProfile(currentProfile, sidebarBox);
-    });
-
-    popover.addEventListener("mouseenter", () => clearTimeout(popoverTimeout));
-    popover.addEventListener("mouseleave", schedulePopoverHide);
-
-    document.addEventListener("click", (e) => {
-      if (!popover.contains(e.target) && !sidebarBox.contains(e.target) && !e.target.closest(".user-clickable") && !e.target.closest(".msg-avatar")) {
-        popover.classList.remove("show");
+        notification.onclick = function() {
+          window.focus();
+          this.close();
+        };
       }
-    });
-
-    // Hide popover on scrolling messages
-    messagesEl.addEventListener("scroll", () => {
-      popover.classList.remove("show");
-    });
-
-    $("popover-edit-btn").onclick = () => {
-      popover.classList.remove("show");
-      openEditProfileModal();
-    };
-  }
-
-  function schedulePopoverHide() {
-    clearTimeout(popoverTimeout);
-    popoverTimeout = setTimeout(() => {
-      const popover = $("profile-popover");
-      if (!popover.matches(":hover")) popover.classList.remove("show");
-    }, 200);
-  }
-
-  function showPopoverForProfile(profileData, targetElement) {
-    clearTimeout(popoverTimeout);
-    const popover = $("profile-popover");
-
-    const displayName = profileData.display_name || profileData.username || "Unknown";
-    const avatar = profileData.avatar_url || "group-logo.png";
-    const bio = profileData.bio || "No bio added yet.";
-    const isAdmin = profileData.role === "admin";
-    const isSelf = profileData.id === currentUser?.id;
-
-    $("popover-display-name").textContent = displayName;
-    $("popover-username").textContent = "@" + (profileData.username || "user");
-    $("popover-avatar").src = avatar;
-    $("popover-bio").textContent = bio;
-
-    const badgeEl = $("popover-badge");
-    badgeEl.className = "role-badge " + (isAdmin ? "admin" : "member");
-    badgeEl.textContent = isAdmin ? "★ Admin" : "Member";
-
-    $("popover-edit-btn").classList.toggle("hidden", !isSelf);
-
-    // Dynamic Target Position Calculation
-    popover.style.display = "flex"; // Temporary display to compute exact box dimensions
-    const targetRect = targetElement.getBoundingClientRect();
-    const popoverRect = popover.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    // Position directly below target element
-    let top = targetRect.bottom + 6;
-    let left = targetRect.left;
-
-    // Flip vertically if overflowing bottom viewport
-    if (top + popoverRect.height > viewportHeight - 12) {
-      top = targetRect.top - popoverRect.height - 6;
     }
 
-    // Adjust horizontal position if overflowing right edge
-    if (left + popoverRect.width > viewportWidth - 12) {
-      left = viewportWidth - popoverRect.width - 12;
-    }
-
-    // Ensure it doesn't leak out of top or left screens
-    top = Math.max(10, top);
-    left = Math.max(10, left);
-
-    popover.style.top = `${top}px`;
-    popover.style.left = `${left}px`;
-
-    popover.classList.add("show");
-  }
-
-  function attachChatUserEvents(element, profileData) {
-    element.addEventListener("mouseenter", () => showPopoverForProfile(profileData, element));
-    element.addEventListener("mouseleave", schedulePopoverHide);
-    element.addEventListener("click", (e) => {
-      e.stopPropagation();
-      showPopoverForProfile(profileData, element);
-    });
-  }
-
-  setupProfileEvents();
-
-  function openEditProfileModal() {
-    $("edit-display-name").value = currentProfile.display_name || currentProfile.username;
-    $("edit-avatar-url").value = currentProfile.avatar_url || "";
-    $("edit-bio").value = currentProfile.bio || "";
-    $("edit-profile-modal").classList.remove("hidden");
-  }
-
-  $("close-profile-modal").onclick = () => $("edit-profile-modal").classList.add("hidden");
-
-  $("save-profile-btn").onclick = async () => {
-    const displayName = $("edit-display-name").value.trim();
-    const avatarUrl = $("edit-avatar-url").value.trim();
-    const bio = $("edit-bio").value.trim();
-
-    $("save-profile-btn").disabled = true;
-    try {
-      const { error } = await sb.from("profiles")
-        .update({
-          display_name: displayName,
-          avatar_url: avatarUrl,
-          bio: bio
-        })
-        .eq("id", currentUser.id);
-
-      if (error) throw error;
-
-      $("edit-profile-modal").classList.add("hidden");
-      await loadProfile();
-      await loadMessages();
-    } catch (e) {
-      alert("Failed to save profile: " + e.message);
-    } finally {
-      $("save-profile-btn").disabled = false;
-    }
-  };
-
-  async function loadProfile() {
-    const { data, error } = await sb.from("profiles")
-      .select("*").eq("id", currentUser.id).single();
-    if (error) throw error;
-    currentProfile = data;
-
-    if (currentProfile.banned) {
-      await sb.auth.signOut();
-      throw new Error("This account has been banned from the portal.");
-    }
-
-    const displayName = currentProfile.display_name || currentProfile.username;
-    const avatar = currentProfile.avatar_url || "group-logo.png";
-    const isAdmin = currentProfile.role === "admin";
-
-    // Sidebar Profile
-    $("who").textContent = displayName;
-    $("subwho").textContent = "@" + currentProfile.username;
-    $("sidebar-avatar").src = avatar;
-
-    $("admin-btn").classList.toggle("hidden", !isAdmin);
-  }
-
-  async function enterApp() {
-    try {
-      await loadProfile();
-      authScreen.classList.add("hidden");
-      app.classList.remove("hidden");
-      await loadMessages();
-      subscribeRealtime();
-    } catch (e) {
-      authScreen.classList.remove("hidden");
-      app.classList.add("hidden");
-      showStatus(e.message || "Could not load your account.");
-    }
-  }
-
-  async function loadMessages() {
-    messagesEl.innerHTML = '<div class="empty">Loading messages…</div>';
-    const { data, error } = await sb.from("messages")
-      .select(`
-        id, user_id, content, created_at, deleted, reply_to,
-        profiles:user_id(id, username, display_name, avatar_url, bio, role)
-      `)
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      messagesEl.innerHTML = '<div class="empty">Could not load messages.</div>';
-      console.error(error);
-      return;
-    }
-
-    if (!data.length) {
-      messagesEl.innerHTML = '<div class="empty">No messages yet. Start the conversation.</div>';
-      return;
-    }
-
-    renderMessages(data);
-  }
-
-  function renderMessages(rows) {
-    messagesEl.innerHTML = "";
-    const byId = new Map(rows.map(r => [r.id, r]));
-
-    rows.forEach(row => {
-      const article = document.createElement("article");
-      article.className = "msg" + (row.user_id === currentUser.id ? " mine" : "") + (row.deleted ? " deleted" : "");
-
-      const profile = row.profiles || {};
-      const username = profile.username || "Unknown";
-      const displayName = profile.display_name || username;
-      const avatar = profile.avatar_url || "group-logo.png";
-      const isAdmin = profile.role === "admin";
-      const reply = row.reply_to ? byId.get(row.reply_to) : null;
-
-      let replyHTML = "";
-      if (reply) {
-        const replyProfile = reply.profiles || {};
-        const replyName = replyProfile.display_name || replyProfile.username || "Unknown";
-        replyHTML = `<div class="reply-line">Replying to <strong>${escapeHTML(replyName)}</strong>: ${reply.deleted ? "deleted message" : escapeHTML(reply.content.slice(0,120))}</div>`;
-      }
-
-      article.innerHTML = `
-        <img class="msg-avatar" src="${escapeHTML(avatar)}" alt="">
-        <div class="msg-content-wrap">
-          <div class="msg-head">
-            <span class="user-clickable">${escapeHTML(displayName)}</span>
-            <span style="font-size:10px;color:#6b7887">(@${escapeHTML(username)})</span>
-            ${isAdmin ? '<span class="role-badge admin" style="font-size:8px">Admin</span>' : ''}
-            <span class="time">${formatTime(row.created_at)}</span>
-          </div>
-          ${replyHTML}
-          <div class="body">${row.deleted ? '<span class="deleted-text">This message is deleted</span>' : formatText(row.content)}</div>
-          <div class="msg-tools">
-            ${!row.deleted ? '<button class="tiny reply-btn">Reply</button>' : ''}
-            ${!row.deleted && row.user_id === currentUser.id ? '<button class="tiny delete-msg-btn">Delete</button>' : ''}
-            ${!row.deleted && currentProfile?.role === "admin" ? '<button class="tiny delete-admin-btn">Remove</button>' : ''}
-          </div>
+    function showInAppToast(sender, message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'animate-toast pointer-events-auto flex items-start gap-3 p-4 bg-slate-900 border border-slate-700/80 rounded-xl shadow-2xl backdrop-blur-lg';
+      
+      toast.innerHTML = `
+        <div class="relative shrink-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-brand-500 inline-block"></span>
         </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-semibold text-slate-200">${sender}</p>
+          <p class="text-xs text-slate-400 truncate mt-0.5">${message}</p>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-slate-500 hover:text-slate-300 text-xs font-bold px-1">✕</button>
       `;
 
-      // Floating Popover Events tied strictly to username & avatar elements
-      const usernameEl = article.querySelector(".user-clickable");
-      const avatarEl = article.querySelector(".msg-avatar");
-      if (usernameEl) attachChatUserEvents(usernameEl, profile);
-      if (avatarEl) attachChatUserEvents(avatarEl, profile);
-
-      const replyBtn = article.querySelector(".reply-btn");
-      if (replyBtn) replyBtn.onclick = () => startReply(row, username);
-
-      const del = article.querySelector(".delete-msg-btn");
-      if (del) del.onclick = () => softDeleteMessage(row.id);
-
-      const adminDel = article.querySelector(".delete-admin-btn");
-      if (adminDel) adminDel.onclick = () => adminDeleteMessage(row.id);
-
-      messagesEl.appendChild(article);
-    });
-
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function startReply(row, username) {
-    replyTo = row;
-    $("reply-banner").classList.remove("hidden");
-    $("reply-label").textContent = "Replying to @" + username;
-    input.value = `@${username} ` + input.value;
-    input.focus();
-  }
-
-  $("cancel-reply").onclick = () => {
-    replyTo = null;
-    $("reply-banner").classList.add("hidden");
-  };
-
-  async function sendMessage() {
-    const content = input.value.trim();
-    if (!content || !currentUser) return;
-
-    $("send-btn").disabled = true;
-    try {
-      const { error } = await sb.from("messages").insert({
-        user_id: currentUser.id,
-        content,
-        reply_to: replyTo?.id || null
-      });
-      if (error) throw error;
-      input.value = "";
-      replyTo = null;
-      $("reply-banner").classList.add("hidden");
-    } catch (e) {
-      alert(e.message || "Message could not be sent.");
-    } finally {
-      $("send-btn").disabled = false;
-    }
-  }
-
-  async function softDeleteMessage(id) {
-    if (!confirm("Delete this message?")) return;
-    const { error } = await sb.from("messages")
-      .update({ deleted: true, content: "[deleted]" })
-      .eq("id", id)
-      .eq("user_id", currentUser.id);
-
-    if (error) alert(error.message);
-  }
-
-  async function adminDeleteMessage(id) {
-    if (!confirm("Remove this message as an administrator?")) return;
-    const { error } = await sb.from("messages")
-      .update({ deleted: true, content: "[removed by administrator]" })
-      .eq("id", id);
-    if (error) alert(error.message);
-  }
-
-  function subscribeRealtime() {
-    if (realtimeChannel) sb.removeChannel(realtimeChannel);
-
-    realtimeChannel = sb.channel("apbn-message-feed")
-      .on("postgres_changes", {
-        event: "*",
-        schema: "public",
-        table: "messages"
-      }, () => loadMessages())
-      .subscribe();
-  }
-
-  async function logout() {
-    if (realtimeChannel) {
-      await sb.removeChannel(realtimeChannel);
-      realtimeChannel = null;
-    }
-    await sb.auth.signOut();
-  }
-
-  async function openAdmin() {
-    $("admin-modal").classList.remove("hidden");
-    await loadAdminUsers();
-  }
-
-  async function loadAdminUsers() {
-    const list = $("admin-list");
-    list.textContent = "Loading…";
-    const { data, error } = await sb.from("profiles")
-      .select("id,username,display_name,role,banned,ban_reason,created_at")
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      list.textContent = error.message;
-      return;
+      container.appendChild(toast);
+      setTimeout(() => {
+        if (toast.parentElement) toast.remove();
+      }, 4000);
     }
 
-    list.innerHTML = "";
-    data.forEach(p => {
-      const row = document.createElement("div");
-      row.className = "admin-row";
-      const name = p.display_name || p.username;
-      row.innerHTML = `
-        <div>
-          <strong>${escapeHTML(name)}</strong> <small>(@${escapeHTML(p.username)})</small>
-          <span class="role-badge ${p.role === "admin" ? "admin" : "member"}">${p.role}</span>
-          ${p.banned ? '<span class="role-badge" style="background:#ffcdd2;color:#b71c1c">BANNED</span>' : ''}
-        </div>
-        <button class="tiny ban-toggle">${p.banned ? "Unban" : "Ban"}</button>
-      `;
+    function triggerSimulatedMessage() {
+      const sender = "David Chen";
+      const msg = "Hey, did you get a chance to review the pull request?";
+      const avatar = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80";
 
-      row.querySelector(".ban-toggle").onclick = async () => {
-        if (p.id === currentUser.id) {
-          alert("Do not ban your own admin account.");
-          return;
-        }
-        let reason = "";
-        if (!p.banned) {
-          reason = prompt("Ban reason (optional):", "Violation of APBn portal rules") || "";
-        }
-        const { error } = await sb.from("profiles")
-          .update({ banned: !p.banned, ban_reason: p.banned ? null : reason })
-          .eq("id", p.id);
-        if (error) alert(error.message);
-        else loadAdminUsers();
-      };
+      // 1. Update unread badge in sidebar
+      const badge = document.getElementById('unread-badge-2');
+      if (badge) badge.classList.remove('hidden');
 
-      list.appendChild(row);
-    });
-  }
+      // 2. Trigger floating in-app UI toast
+      showInAppToast(sender, msg);
 
-  $("login-btn").onclick = login;
-  $("signup-btn").onclick = createAccount;
-  $("send-btn").onclick = sendMessage;
-  $("logout-btn").onclick = logout;
-  $("admin-btn").onclick = openAdmin;
-  $("account-toolbar").onclick = () => $("account-modal").classList.remove("hidden");
-  $("close-admin").onclick = () => $("admin-modal").classList.add("hidden");
-  $("close-account").onclick = () => $("account-modal").classList.add("hidden");
+      // 3. Trigger native browser system notification
+      sendBrowserNotification(sender, msg, avatar);
+    }
 
-  input.addEventListener("keydown", e => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    function sendMessage(e) {
       e.preventDefault();
-      sendMessage();
-    }
-  });
+      const input = document.getElementById('message-input');
+      const text = input.value.trim();
+      if (!text) return;
 
-  sb.auth.onAuthStateChange(async (event, session) => {
-    currentUser = session?.user || null;
-    if (currentUser) {
-      await enterApp();
-    } else {
-      currentProfile = null;
-      app.classList.add("hidden");
-      authScreen.classList.remove("hidden");
-      switchAuth("login");
+      const container = document.getElementById('messages-container');
+      const msgBubble = document.createElement('div');
+      msgBubble.className = 'flex items-start gap-3 max-w-lg ml-auto flex-row-reverse';
+      msgBubble.innerHTML = `
+        <div class="bg-brand-600 text-white p-3.5 rounded-2xl rounded-tr-sm text-sm shadow-sm">
+          ${text}
+        </div>
+      `;
+      container.appendChild(msgBubble);
+      input.value = '';
+      container.scrollTop = container.scrollHeight;
     }
-  });
 
-  (async () => {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      currentUser = session.user;
-      await enterApp();
+    function selectChat(id) {
+      if (id === 2) {
+        const badge = document.getElementById('unread-badge-2');
+        if (badge) badge.classList.add('hidden');
+      }
     }
-  })();
-})();
-</script>
+  </script>
 </body>
 </html>
