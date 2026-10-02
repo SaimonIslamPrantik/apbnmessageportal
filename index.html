@@ -1023,6 +1023,14 @@
     }[c]));
   }
 
+  // Strips HTML and markdown formatting for clean plain-text desktop notifications
+  function stripFormatting(str) {
+    if (!str) return "";
+    let clean = String(str).replace(/<[^>]*>/g, ""); // strip HTML tags
+    clean = clean.replace(/[*_~`]/g, "");           // strip markdown symbols
+    return clean.trim();
+  }
+
   function formatText(s) {
     let safe = escapeHTML(s);
     safe = safe.replace(/(^|[\s])(@[A-Za-z]+@[0-9]+)\b/g, '$1<span class="mention">$2</span>');
@@ -1057,7 +1065,6 @@
       return;
     }
 
-    // Default to true if not explicitly disabled
     const savedPref = localStorage.getItem("apbn_notifications_enabled");
     if (savedPref === null) {
       localStorage.setItem("apbn_notifications_enabled", "true");
@@ -1120,7 +1127,6 @@
       return;
     }
 
-    // Fire notification if tab isn't focused or window is minimized or forceShow is set
     const isAppMinimized = winEl.classList.contains("minimized");
     const isHiddenTab = document.hidden || document.visibilityState !== "visible";
 
@@ -1128,10 +1134,14 @@
       return; 
     }
 
+    // Clean formatting and truncate body text for clean OS notification popups
+    const cleanBody = stripFormatting(messageText);
+    const truncatedBody = cleanBody.length > 120 ? cleanBody.slice(0, 117) + "..." : cleanBody;
+
     try {
-      const title = `Message from ${senderName}`;
+      const title = `Message from ${stripFormatting(senderName)}`;
       const options = {
-        body: messageText,
+        body: truncatedBody || "New message received.",
         icon: "group-logo.png",
         badge: "group-logo.png",
         tag: "apbn-chat-" + Date.now(),
@@ -1564,8 +1574,7 @@
         table: "messages"
       }, async (payload) => {
         const newMsg = payload.new;
-        if (newMsg && newMsg.user_id !== currentUser?.id) {
-          // Fetch sender profile details asynchronously
+        if (newMsg && newMsg.user_id !== currentUser?.id && !newMsg.deleted) {
           try {
             const { data: sender } = await sb.from("profiles")
               .select("display_name, username")
