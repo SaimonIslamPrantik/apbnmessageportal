@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111111">
+  <title>APBn Squad Message Portal</title>
+  <style>
+    :root{
+      --xp-blue:#1769d1; --xp-blue-dark:#0b3d91; --xp-blue-lite:#5ca7ff;
+      --xp-bg:#dcecff; --xp-panel:#f6fbff; --xp-border:#6d89a8;
+      --xp-green:#2aa84a; --black:#000; --text:#111; --muted:#566579;
+      --red:#c60000;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#000;color:var(--text)}
+    body{font-family:Tahoma,Verdana,Arial,sans-serif;overflow:hidden}
+    button,input,textarea{font:inherit} button{cursor:pointer}.hidden{display:none!important}
+
+    /* Black desktop backdrop + Windows Messenger-era application window */
+    .screen{min-height:100vh;display:grid;place-items:center;padding:24px;background:#000}
+    .card{width:min(430px,100%);background:linear-gradient(#f9fcff,#dbe9f8);border:1px solid #526b88;border-radius:8px;box-shadow:0 0 0 1px #dce8f4,0 14px 50px #000;overflow:hidden;padding:0}
+    .xp-titlebar{height:31px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;color:#fff;font-weight:bold;font-size:12px;background:linear-gradient(#65adff 0,#2679dd 42%,#0b4ba7 100%);border-bottom:1px solid #0a3678;text-shadow:1px 1px #16457c}
+    .window-buttons{display:flex;gap:3px}.window-buttons span{width:19px;height:18px;display:grid;place-items:center;border:1px solid #bcd5f3;border-radius:3px;background:linear-gradient(#6eb4ff,#1663be);font-size:11px}.window-buttons .close{background:linear-gradient(#ff7b70,#b9150d);border-color:#ffd0cc}
+    .login-inner{padding:20px 24px 22px}.login-head{display:flex;gap:18px;align-items:center;margin-bottom:15px}.login-logo{width:90px;height:90px;border-radius:9px;border:1px solid #91a8bf;background:#fff;object-fit:contain;box-shadow:0 2px 5px #66778855}.login-title h1{font:700 21px Tahoma,Verdana,sans-serif;margin:0 0 4px;color:#173a68;text-transform:none;text-shadow:none}.login-title p{margin:0;color:#5c6f84;font-size:12px}.sub{color:#5d6d7e;margin:0 0 16px;font-size:12px}
+    label{display:block;color:#23384d;font-size:12px;margin:11px 0 5px}input,textarea{width:100%;background:#fff;color:#111;border:1px solid #8197ad;border-radius:2px;padding:8px 9px;outline:none;box-shadow:inset 0 1px 2px #8899aa44}input:focus,textarea:focus{border-color:#347dcc;box-shadow:0 0 0 1px #76aee8}.btn{border:1px solid #315f91;border-radius:3px;padding:7px 14px;background:linear-gradient(#fff,#d9e7f5 48%,#b7cde4);color:#102d4b;font-weight:bold;font-size:12px;box-shadow:inset 0 1px #fff,0 1px 2px #0003}.btn:hover{filter:brightness(1.04)}.btn.secondary{background:linear-gradient(#fff,#e7eef5 48%,#cbd9e7);color:#21384f}.btn.danger{background:linear-gradient(#fff,#ffdede 48%,#f0a9a9);color:#7c0000;border-color:#a55}.btn.full{width:100%;margin-top:14px}.switch{margin-top:15px;text-align:center;color:#5c6d80;font-size:11px}.switch button{background:none;border:0;color:#064fa9;text-decoration:underline;padding:0}.error,.ok{margin-top:12px;padding:8px;border-radius:3px;font-size:11px}.error{background:#ffe2e2;border:1px solid #cf8d8d;color:#8a0000}.ok{background:#e1f5e5;border:1px solid #8abf93;color:#126022}
+
+    #app{height:100vh;display:flex;align-items:center;justify-content:center;background:#000;padding:18px}
+    .messenger-window{width:min(980px,100%);height:min(760px,calc(100vh - 36px));display:flex;flex-direction:column;background:#edf4fc;border:1px solid #476481;border-radius:8px;box-shadow:0 0 0 1px #b7c9db,0 18px 70px #000;overflow:hidden}
+    .app-titlebar{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content:space-between;padding:0 7px;color:#fff;font-weight:bold;font-size:12px;background:linear-gradient(#63adff,#277bdd 45%,#0a4aa4);border-bottom:1px solid #123b70;text-shadow:1px 1px #1d4b80}.app-title{display:flex;align-items:center;gap:7px}.mini-logo{width:22px;height:22px;border-radius:3px;background:#fff;object-fit:contain;border:1px solid #adc3dc}.app-titlebar .window-buttons span{width:20px;height:19px}
+    .toolbar{height:38px;flex:0 0 38px;display:flex;align-items:center;gap:6px;padding:4px 8px;background:linear-gradient(#fff,#e3edf7);border-bottom:1px solid #a5b8cb}.toolbar .sep{height:23px;width:1px;background:#b7c4d1;margin:0 3px}.status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:#4a5f74}.status-dot{width:9px;height:9px;border-radius:50%;background:var(--xp-green);border:1px solid #176b2d}
+    .workspace{flex:1;min-height:0;display:flex;background:#fff}
+    .sidebar{width:220px;flex:0 0 220px;background:linear-gradient(90deg,#eaf3fc,#d8e8f8);border-right:1px solid #9cafc3;padding:9px;display:flex;flex-direction:column}.profile-box{display:flex;gap:8px;padding:8px;background:linear-gradient(#fff,#e4edf6);border:1px solid #a5b6c7;border-radius:4px;box-shadow:inset 0 1px #fff}.profile-avatar{width:44px;height:44px;border:1px solid #91a6ba;background:#fff;border-radius:4px;object-fit:contain}.profile-name{font-weight:bold;color:#1d426c;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.profile-state{font-size:11px;color:#2b7a3b;margin-top:3px}.side-title{font-weight:bold;font-size:11px;color:#40566c;margin:12px 4px 5px}.contact{display:flex;gap:7px;align-items:center;padding:7px 6px;border-radius:3px;font-size:12px;color:#314a62}.contact.active{background:linear-gradient(#fff,#d6e7f8);border:1px solid #a6bdd5}.contact-dot{width:10px;height:10px;border-radius:50%;background:#3aaa55;border:1px solid #1b7330}.rules{margin-top:auto;font-size:10px;line-height:1.45;color:#5c6b79;background:#eef5fb;border:1px solid #b8c7d6;padding:7px;border-radius:3px}
+    main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;background:#fff}.chat-header{height:54px;flex:0 0 54px;background:linear-gradient(#fff,#e4edf6);border-bottom:1px solid #a9bacb;padding:8px 12px}.chat-header strong{font-size:14px;color:#173c64}.chat-header small{display:block;color:#6b7887;font-size:10px;margin-top:2px}
+    #messages{flex:1;overflow:auto;padding:12px 14px;background:#fff;scrollbar-color:#9aaabc #edf2f7}.msg{position:relative;margin:0 0 8px;padding:8px 10px;background:#fff;border-bottom:1px solid #d8e0e8}.msg.mine{background:#f3f8fd;border-left:3px solid #4d91d8}.msg.deleted{opacity:.72}.msg-head{display:flex;align-items:center;gap:7px;margin-bottom:2px}.user{font-weight:bold;color:#144f8f;font-size:12px}.time{font-size:10px;color:#7a8794}.body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;color:#1b1b1b}.deleted-text{font-style:italic;color:#7b8793}.mention{color:#065db3;font-weight:bold}.reply-line{font-size:10px;color:#667787;border-left:2px solid #8fb5dc;padding-left:7px;margin-bottom:5px}.msg-tools{display:flex;justify-content:flex-end;gap:5px;margin-top:5px}.tiny{border:1px solid #9aaabd;background:linear-gradient(#fff,#e3eaf1);color:#2a4056;border-radius:2px;padding:3px 7px;font-size:10px}.tiny:hover{background:#dcecff}
+    #composer-wrap{padding:7px 10px 9px;background:linear-gradient(#edf4fb,#d7e6f4);border-top:1px solid #a7b8ca}.reply-banner{max-width:none;margin:0 0 5px;background:#fff7cf;border:1px solid #dfca79;padding:5px 8px;border-radius:2px;font-size:10px;color:#655522;display:flex;justify-content:space-between}.composer{display:flex;gap:6px;align-items:flex-end}.composer textarea{flex:1;min-height:42px;max-height:100px}
+    .modal{position:fixed;inset:0;background:#0009;display:grid;place-items:center;padding:20px;z-index:10}.modal .card{max-height:90vh;overflow:auto}.admin-row{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid #d2dce6}.badge{font-size:9px;border:1px solid #9eafc0;border-radius:8px;padding:2px 5px;color:#657688}.badge.admin{color:#135c9e;border-color:#7da8cf}
+    .empty{text-align:center;color:#7b8792;padding:50px 10px;font-size:12px}
+    /* Mobile / normal view only: keep desktop layout unchanged, but make all content reachable. */
+    @media(max-width:700px){
+      html,body{min-height:100%;height:auto;overflow:auto}
+      body{overflow-x:hidden}
+      .screen{min-height:100vh;height:auto;place-items:start center;padding:12px}
+      .card{width:100%;max-width:430px}
+      #app{height:auto;min-height:100vh;align-items:flex-start;padding:0;overflow:visible}
+      .messenger-window{width:100%;height:auto;min-height:100vh;border-radius:0;overflow:visible}
+      .toolbar{overflow-x:auto;overflow-y:hidden;white-space:nowrap;flex-wrap:nowrap}
+      .workspace{min-height:calc(100vh - 72px);height:auto}
+      main{min-height:calc(100vh - 72px);height:auto}
+      #messages{min-height:300px;overflow-y:auto}
+      #composer-wrap{position:relative}
+      .brand-text{display:none}
+    }
+    @media(max-width:520px){
+      /* Keep the desktop sidebar visible on mobile too. */
+      .sidebar{
+        display:flex;
+        width:155px;
+        flex:0 0 155px;
+        padding:7px;
+      }
+      .profile-box{padding:6px;gap:6px}
+      .profile-avatar{width:38px;height:38px}
+      .side-title{margin:10px 3px 5px}
+      .contact{padding:6px 4px;font-size:11px}
+      .rules{font-size:9px;padding:6px}
+      .login-inner{padding:18px}
+      .login-head{gap:12px}
+      .login-logo{width:75px;height:75px}
+      .app-titlebar{height:34px}
+      .toolbar{padding:4px 6px}
+      .toolbar .btn{flex:0 0 auto}
+      .chat-header{height:auto;min-height:54px}
+      #messages{min-height:320px;padding:10px}
+      .msg{padding:8px}
+      .composer{align-items:stretch}
+      .composer textarea{min-height:46px}
+      .composer .btn{align-self:stretch}
+    }
+  </style>
+</head>
+<body>
+
+<section id="auth-screen" class="screen">
+  <div class="card">
+    <div class="xp-titlebar"><span>APBn Squad Message Portal</span><div class="window-buttons"><span>_</span><span>□</span><span class="close">×</span></div></div>
+    <div class="login-inner">
+      <div class="login-head">
+        <img class="login-logo" src="group-logo.png" alt="APBn Squad logo">
+        <div class="login-title"><h1>APBn Squad</h1><p>Message Portal</p></div>
+      </div>
+
+      <div id="login-box">
+        <h2 style="margin:0 0 4px;color:#173a68;font-size:18px">Sign in</h2>
+        <p class="sub">Enter your APBn account to continue.</p>
+        <label for="login-username">Username</label>
+        <input id="login-username" autocomplete="username" placeholder="alphabet@number">
+        <label for="login-password">Password</label>
+        <input id="login-password" type="password" autocomplete="current-password" placeholder="Password">
+        <button class="btn full" id="login-btn">Sign in</button>
+        <div class="switch">New to the portal? <button id="show-signup">Create an account</button></div>
+      </div>
+
+      <div id="signup-box" class="hidden">
+        <h2 style="margin:0 0 4px;color:#173a68;font-size:18px">Create account</h2>
+        <p class="sub">Username format: alphabet@number.</p>
+        <label for="signup-username">Username</label>
+        <input id="signup-username" autocomplete="username" placeholder="alphabet@number">
+        <label for="signup-password">Password</label>
+        <input id="signup-password" type="password" autocomplete="new-password" placeholder="Minimum 6 characters">
+        <label for="signup-password2">Confirm password</label>
+        <input id="signup-password2" type="password" autocomplete="new-password" placeholder="Repeat password">
+        <button class="btn full" id="signup-btn">Create account</button>
+        <div class="switch">Already registered? <button id="show-login">Sign in</button></div>
+      </div>
+      <div id="auth-status"></div>
+    </div>
+  </div>
+</section>
+
+<section id="app" class="hidden">
+  <div class="messenger-window">
+    <div class="app-titlebar">
+      <div class="app-title"><img class="mini-logo" src="group-logo.png" alt=""><span>APBn Squad Message Portal</span></div>
+      <div class="window-buttons"><span>_</span><span>□</span><span class="close">×</span></div>
+    </div>
+    <div class="toolbar">
+      <button class="btn secondary" id="account-toolbar">My account</button>
+      <button class="btn secondary" id="admin-btn">Admin</button>
+      <button class="btn secondary" id="logout-btn">Sign out</button>
+      <div class="sep"></div><div class="status"><span class="status-dot"></span>Online</div>
+    </div>
+    <div class="workspace">
+      <aside class="sidebar">
+        <div class="profile-box">
+          <img class="profile-avatar" src="group-logo.png" alt="">
+          <div style="min-width:0"><div class="profile-name" id="who"></div><div class="profile-state">Online</div></div>
+        </div>
+        <div class="side-title">SQUAD</div>
+        <div class="contact active"><span class="contact-dot"></span><strong>APBn Squad</strong></div>
+        <div class="side-title">PORTAL</div>
+        <div class="contact">● Group messages</div>
+        <div class="contact">● Replies & mentions</div>
+        <div class="rules"><strong>Portal rules</strong><br>Keep messages appropriate. Administrators may remove messages or ban accounts for rule violations.</div>
+      </aside>
+      <main>
+        <div class="chat-header"><strong>APBn Squad</strong><small>Group message conversation · Real-time</small></div>
+        <div id="messages"><div class="empty">Loading messages…</div></div>
+        <div id="composer-wrap">
+          <div id="reply-banner" class="reply-banner hidden"><span id="reply-label"></span><button class="tiny" id="cancel-reply">Cancel</button></div>
+          <div class="composer">
+            <textarea id="message-input" maxlength="2000" placeholder="Type a squad message… Use Reply to tag a user."></textarea>
+            <button class="btn" id="send-btn">Send</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+
+<div id="admin-modal" class="modal hidden">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div><h2>Admin</h2><p class="sub">Manage squad accounts.</p></div>
+      <button class="tiny" id="close-admin">Close</button>
+    </div>
+    <div id="admin-list">Loading…</div>
+  </div>
+</div>
+
+<div id="account-modal" class="modal hidden">
+  <div class="card">
+    <h2>Account</h2>
+    <p class="sub">Deleting your account permanently removes the account and its messages.</p>
+    <button class="btn danger full" id="delete-account-btn">Delete my account</button>
+    <button class="btn secondary full" id="close-account">Cancel</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  "use strict";
+
+  // ================================
+  // 1. PUT YOUR SUPABASE VALUES HERE
+  // ================================
+  const SUPABASE_URL = "https://exhhtosvrgkvhjighjeg.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_6woACdWWYM-GxotpgcZ5kA_ny_N8MAf";
+
+  // Supabase email/password auth is used internally. Users never see this
+  // synthetic address; they log in with their APBn username.
+  const AUTH_DOMAIN = "apbn.local";
+
+  const { createClient } = window.supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  const $ = id => document.getElementById(id);
+  const authScreen = $("auth-screen"), app = $("app");
+  const authStatus = $("auth-status"), messagesEl = $("messages");
+  const input = $("message-input");
+  let currentUser = null;
+  let currentProfile = null;
+  let replyTo = null;
+  let realtimeChannel = null;
+
+  const usernameRegex = /^[A-Za-z]+@[0-9]+$/;
+
+  function authEmail(username) {
+    // Encode the APBn username so the internal Auth identifier is a valid
+    // single-at-sign email address. Example: alphabet@number -> <encoded>@apbn.local
+    const bytes = new TextEncoder().encode(username.trim().toLowerCase());
+    let binary = "";
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    const encoded = btoa(binary).replace(/=+$/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+    return encoded + "@" + AUTH_DOMAIN;
+  }
+
+  function showStatus(message, good=false) {
+    authStatus.className = good ? "ok" : "error";
+    authStatus.textContent = message;
+  }
+
+  function clearStatus() {
+    authStatus.className = "";
+    authStatus.textContent = "";
+  }
+
+  function escapeHTML(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[c]));
+  }
+
+  function formatText(s) {
+    let safe = escapeHTML(s);
+    // Highlight @Name@123 tokens without making them executable HTML.
+    safe = safe.replace(/(^|[\s])(@[A-Za-z]+@[0-9]+)\b/g, '$1<span class="mention">$2</span>');
+    return safe;
+  }
+
+  function formatTime(value) {
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium", timeStyle: "short"
+    }).format(new Date(value));
+  }
+
+  function switchAuth(mode) {
+    $("login-box").classList.toggle("hidden", mode !== "login");
+    $("signup-box").classList.toggle("hidden", mode !== "signup");
+    clearStatus();
+  }
+
+  $("show-signup").onclick = () => switchAuth("signup");
+  $("show-login").onclick = () => switchAuth("login");
+
+  async function createAccount() {
+    clearStatus();
+    const username = $("signup-username").value.trim();
+    const password = $("signup-password").value;
+    const password2 = $("signup-password2").value;
+
+    if (!usernameRegex.test(username)) {
+      showStatus("Username must look like alphabet@number — letters before @ and numbers after it.");
+      return;
+    }
+    if (password.length < 6) {
+      showStatus("Password must be at least 6 characters.");
+      return;
+    }
+    if (password !== password2) {
+      showStatus("Passwords do not match.");
+      return;
+    }
+
+    $("signup-btn").disabled = true;
+    try {
+      // This check improves the UX. The unique DB constraint remains the
+      // authoritative protection against duplicate usernames.
+      const { data: existing, error: lookupError } = await sb
+        .from("profiles")
+        .select("id")
+        .eq("username_normalized", username.toLowerCase())
+        .maybeSingle();
+
+      if (lookupError) throw lookupError;
+      if (existing) throw new Error("That username already exists.");
+
+      const { data, error } = await sb.auth.signUp({
+        email: authEmail(username),
+        password,
+        options: { data: { username } }
+      });
+
+      if (error) throw error;
+
+      // With Confirm Email disabled in Supabase, a session is returned.
+      // If email confirmation is enabled, this synthetic address cannot
+      // receive mail, so this portal should use Confirm Email = OFF.
+      if (!data.session) {
+        showStatus("Account created, but Supabase email confirmation is enabled. Disable Confirm Email in Authentication settings for this username-only portal.");
+      } else {
+        showStatus("Account created. You can now enter the portal.", true);
+        switchAuth("login");
+        $("login-username").value = username;
+      }
+    } catch (e) {
+      showStatus(e.message || "Could not create account.");
+    } finally {
+      $("signup-btn").disabled = false;
+    }
+  }
+
+  async function login() {
+    clearStatus();
+    const username = $("login-username").value.trim();
+    const password = $("login-password").value;
+
+    if (!usernameRegex.test(username)) {
+      showStatus("Enter a username like alphabet@number.");
+      return;
+    }
+    if (!password) {
+      showStatus("Enter your password.");
+      return;
+    }
+
+    $("login-btn").disabled = true;
+    try {
+      const { error } = await sb.auth.signInWithPassword({
+        email: authEmail(username),
+        password
+      });
+      if (error) throw error;
+    } catch (e) {
+      showStatus("Login failed. Check your username and password.");
+    } finally {
+      $("login-btn").disabled = false;
+    }
+  }
+
+  async function loadProfile() {
+    const { data, error } = await sb.from("profiles")
+      .select("*").eq("id", currentUser.id).single();
+    if (error) throw error;
+    currentProfile = data;
+
+    if (currentProfile.banned) {
+      await sb.auth.signOut();
+      throw new Error("This account has been banned from the portal.");
+    }
+
+    $("who").textContent = currentProfile.username;
+    $("admin-btn").classList.toggle("hidden", currentProfile.role !== "admin");
+  }
+
+  async function enterApp() {
+    try {
+      await loadProfile();
+      authScreen.classList.add("hidden");
+      app.classList.remove("hidden");
+      await loadMessages();
+      subscribeRealtime();
+    } catch (e) {
+      authScreen.classList.remove("hidden");
+      app.classList.add("hidden");
+      showStatus(e.message || "Could not load your account.");
+    }
+  }
+
+  async function loadMessages() {
+    messagesEl.innerHTML = '<div class="empty">Loading messages…</div>';
+    const { data, error } = await sb.from("messages")
+      .select(`
+        id, user_id, content, created_at, deleted, reply_to,
+        profiles:user_id(username)
+      `)
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      messagesEl.innerHTML = '<div class="empty">Could not load messages.</div>';
+      console.error(error);
+      return;
+    }
+
+    if (!data.length) {
+      messagesEl.innerHTML = '<div class="empty">No messages yet. Start the conversation.</div>';
+      return;
+    }
+
+    renderMessages(data);
+  }
+
+  function renderMessages(rows) {
+    messagesEl.innerHTML = "";
+    const byId = new Map(rows.map(r => [r.id, r]));
+
+    rows.forEach(row => {
+      const article = document.createElement("article");
+      article.className = "msg" + (row.user_id === currentUser.id ? " mine" : "") + (row.deleted ? " deleted" : "");
+
+      const username = row.profiles?.username || "Unknown";
+      const reply = row.reply_to ? byId.get(row.reply_to) : null;
+
+      let replyHTML = "";
+      if (reply) {
+        const replyName = reply.profiles?.username || "Unknown";
+        replyHTML = `<div class="reply-line">Replying to <strong>${escapeHTML(replyName)}</strong>: ${reply.deleted ? "deleted message" : escapeHTML(reply.content.slice(0,120))}</div>`;
+      }
+
+      article.innerHTML = `
+        <div class="msg-head">
+          <span class="user">${escapeHTML(username)}</span>
+          ${currentProfile?.role === "admin" && username !== currentProfile.username ? '<span class="badge admin">member</span>' : ''}
+          <span class="time">${formatTime(row.created_at)}</span>
+        </div>
+        ${replyHTML}
+        <div class="body">${row.deleted ? '<span class="deleted-text">This message is deleted by user</span>' : formatText(row.content)}</div>
+        <div class="msg-tools">
+          ${!row.deleted ? '<button class="tiny reply-btn">Reply</button>' : ''}
+          ${!row.deleted && row.user_id === currentUser.id ? '<button class="tiny delete-msg-btn">Delete</button>' : ''}
+          ${!row.deleted && currentProfile?.role === "admin" ? '<button class="tiny delete-admin-btn">Remove</button>' : ''}
+        </div>
+      `;
+
+      const replyBtn = article.querySelector(".reply-btn");
+      if (replyBtn) replyBtn.onclick = () => startReply(row, username);
+
+      const del = article.querySelector(".delete-msg-btn");
+      if (del) del.onclick = () => softDeleteMessage(row.id);
+
+      const adminDel = article.querySelector(".delete-admin-btn");
+      if (adminDel) adminDel.onclick = () => adminDeleteMessage(row.id);
+
+      messagesEl.appendChild(article);
+    });
+
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function startReply(row, username) {
+    replyTo = row;
+    $("reply-banner").classList.remove("hidden");
+    $("reply-label").textContent = "Replying to " + username;
+    input.value = `@${username} ` + input.value;
+    input.focus();
+  }
+
+  $("cancel-reply").onclick = () => {
+    replyTo = null;
+    $("reply-banner").classList.add("hidden");
+  };
+
+  async function sendMessage() {
+    const content = input.value.trim();
+    if (!content || !currentUser) return;
+
+    $("send-btn").disabled = true;
+    try {
+      const { error } = await sb.from("messages").insert({
+        user_id: currentUser.id,
+        content,
+        reply_to: replyTo?.id || null
+      });
+      if (error) throw error;
+      input.value = "";
+      replyTo = null;
+      $("reply-banner").classList.add("hidden");
+    } catch (e) {
+      alert(e.message || "Message could not be sent.");
+    } finally {
+      $("send-btn").disabled = false;
+    }
+  }
+
+  async function softDeleteMessage(id) {
+    if (!confirm("Delete this message?")) return;
+    const { error } = await sb.from("messages")
+      .update({ deleted: true, content: "[deleted]" })
+      .eq("id", id)
+      .eq("user_id", currentUser.id);
+
+    if (error) alert(error.message);
+  }
+
+  async function adminDeleteMessage(id) {
+    if (!confirm("Remove this message as an administrator?")) return;
+    const { error } = await sb.from("messages")
+      .update({ deleted: true, content: "[removed by administrator]" })
+      .eq("id", id);
+    if (error) alert(error.message);
+  }
+
+  function subscribeRealtime() {
+    if (realtimeChannel) sb.removeChannel(realtimeChannel);
+
+    realtimeChannel = sb.channel("apbn-message-feed")
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "messages"
+      }, () => loadMessages())
+      .subscribe();
+  }
+
+  async function logout() {
+    if (realtimeChannel) {
+      await sb.removeChannel(realtimeChannel);
+      realtimeChannel = null;
+    }
+    await sb.auth.signOut();
+  }
+
+  async function deleteAccount() {
+    if (!confirm("Delete your APBn account permanently? This cannot be undone.")) return;
+
+    $("delete-account-btn").disabled = true;
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) throw new Error("Your session has expired.");
+
+      // Edge Function verifies the caller's JWT and uses service_role only server-side.
+      const { data, error } = await sb.functions.invoke("delete-account", {
+        body: { confirm: true }
+      });
+
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "Account deletion failed.");
+
+      await sb.auth.signOut();
+      $("account-modal").classList.add("hidden");
+    } catch (e) {
+      alert(e.message || "Account deletion failed.");
+    } finally {
+      $("delete-account-btn").disabled = false;
+    }
+  }
+
+  async function openAdmin() {
+    $("admin-modal").classList.remove("hidden");
+    await loadAdminUsers();
+  }
+
+  async function loadAdminUsers() {
+    const list = $("admin-list");
+    list.textContent = "Loading…";
+    const { data, error } = await sb.from("profiles")
+      .select("id,username,role,banned,ban_reason,created_at")
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      list.textContent = error.message;
+      return;
+    }
+
+    list.innerHTML = "";
+    data.forEach(p => {
+      const row = document.createElement("div");
+      row.className = "admin-row";
+      row.innerHTML = `
+        <div>
+          <strong>${escapeHTML(p.username)}</strong>
+          <span class="badge ${p.role === "admin" ? "admin" : ""}">${p.role}</span>
+          ${p.banned ? '<span class="badge">BANNED</span>' : ''}
+        </div>
+        <button class="tiny ban-toggle">${p.banned ? "Unban" : "Ban"}</button>
+      `;
+
+      row.querySelector(".ban-toggle").onclick = async () => {
+        if (p.id === currentUser.id) {
+          alert("Do not ban your own admin account from this UI.");
+          return;
+        }
+        let reason = "";
+        if (!p.banned) {
+          reason = prompt("Ban reason (optional):", "Violation of APBn portal rules") || "";
+        }
+        const { error } = await sb.from("profiles")
+          .update({ banned: !p.banned, ban_reason: p.banned ? null : reason })
+          .eq("id", p.id);
+        if (error) alert(error.message);
+        else loadAdminUsers();
+      };
+
+      list.appendChild(row);
+    });
+  }
+
+  $("login-btn").onclick = login;
+  $("signup-btn").onclick = createAccount;
+  $("send-btn").onclick = sendMessage;
+  $("logout-btn").onclick = logout;
+  $("admin-btn").onclick = openAdmin;
+  $("account-toolbar").onclick = () => $("account-modal").classList.remove("hidden");
+  $("close-admin").onclick = () => $("admin-modal").classList.add("hidden");
+
+  // Account deletion is intentionally tucked behind the profile menu gesture:
+  // Ctrl/Cmd + click the username in this first version, or use the button below
+  // if you add a normal account menu later.
+  $("who").style.cursor = "pointer";
+  $("who").title = "Open account options";
+  $("who").onclick = () => $("account-modal").classList.remove("hidden");
+  $("close-account").onclick = () => $("account-modal").classList.add("hidden");
+  $("delete-account-btn").onclick = deleteAccount;
+
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    currentUser = session?.user || null;
+    if (currentUser) {
+      await enterApp();
+    } else {
+      currentProfile = null;
+      app.classList.add("hidden");
+      authScreen.classList.remove("hidden");
+      switchAuth("login");
+    }
+  });
+
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      await enterApp();
+    }
+  })();
+})();
+</script>
+</body>
+</html>
