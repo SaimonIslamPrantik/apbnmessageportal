@@ -89,7 +89,8 @@
     }
 
     /* WINDOW MINIMIZED STATE */
-    .messenger-window.minimized {
+    .messenger-window.minimized,
+    .winver-window.minimized {
       opacity: 0 !important;
       pointer-events: none !important;
       transform: scale(0.1) translateY(500px) !important;
@@ -212,6 +213,83 @@
     #composer-wrap{padding:7px 10px 9px;background:linear-gradient(#edf4fb,#d7e6f4);border-top:1px solid #a7b8ca}.reply-banner{max-width:none;margin:0 0 5px;background:#fff7cf;border:1px solid #dfca79;padding:5px 8px;border-radius:2px;font-size:10px;color:#655522;display:flex;justify-content:space-between}.composer{display:flex;gap:6px;align-items:flex-end}.composer textarea{flex:1;min-height:42px;max-height:100px}
     .modal{position:fixed;inset:0;background:#0009;display:grid;place-items:center;padding:20px;z-index:10000}.modal .card{max-height:90vh;overflow:auto;padding:16px}.admin-row{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid #d2dce6}
     .empty{text-align:center;color:#7b8792;padding:50px 10px;font-size:12px}
+
+    /* ================================
+       WINVER.EXE ABOUT US WINDOW STYLES
+       ================================ */
+    .winver-window {
+      position: absolute;
+      width: 480px;
+      max-width: 90vw;
+      background: #f0f0f0;
+      border: 1px solid #476481;
+      border-radius: 8px;
+      box-shadow: 0 0 0 1px #b7c9db, 0 18px 70px #000;
+      overflow: hidden;
+      z-index: 99;
+      transform-origin: bottom left;
+      transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1), opacity 0.2s ease;
+    }
+    .winver-body {
+      padding: 16px;
+      font-size: 11px;
+      color: #000;
+    }
+    .winver-banner {
+      border-bottom: 1px solid #d0d0d0;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    .winver-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #003399;
+      margin-bottom: 4px;
+    }
+    .winver-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 10px;
+    }
+    .dev-card {
+      background: linear-gradient(#ffffff, #f0f4f9);
+      border: 1px solid #b5c4d4;
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: inset 0 1px 0 #fff, 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .dev-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 2px solid #7d96af;
+      object-fit: cover;
+      margin-bottom: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .dev-name {
+      font-weight: bold;
+      font-size: 12px;
+      color: #112a46;
+      margin-bottom: 3px;
+    }
+    .dev-role {
+      font-size: 10px;
+      color: #4a607a;
+      font-weight: bold;
+    }
+    .winver-footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #d0d0d0;
+      display: flex;
+      justify-content: flex-end;
+    }
 
     /* ================================
        WINDOWS 7 AERO TASKBAR (DESKTOP MODE)
@@ -494,6 +572,40 @@
     </div>
   </div>
 
+  <!-- WINVER.EXE ABOUT US WINDOW -->
+  <div class="winver-window hidden" id="winver-window">
+    <div class="app-titlebar" id="winver-titlebar">
+      <div class="app-title"><img class="mini-logo" src="custom-logo.png" alt=""><span>About Windows - APBn Squad</span></div>
+      <div class="window-buttons">
+        <button type="button" class="btn-min" id="winver-min" title="Minimize">_</button>
+        <button type="button" class="close btn-close" id="winver-close" title="Close">×</button>
+      </div>
+    </div>
+    <div class="winver-body">
+      <div class="winver-banner">
+        <div class="winver-title">APBn Squad Message Portal</div>
+        <div style="color:#555">Version 2.0 (OS Build 10240)</div>
+        <div style="color:#555;margin-top:2px">Copyright © APBn Squad. All rights reserved.</div>
+      </div>
+      <div style="font-weight:bold;color:#1d426c;margin-bottom:8px">Developers & Contributors:</div>
+      <div class="winver-columns">
+        <div class="dev-card">
+          <img class="dev-avatar" src="https://avatars.githubusercontent.com/u/82695288?v=4" alt="Saimon Islam Prantik">
+          <div class="dev-name">Saimon Islam Prantik</div>
+          <div class="dev-role">Frontend + UI UX</div>
+        </div>
+        <div class="dev-card">
+          <img class="dev-avatar" src="https://avatars.githubusercontent.com/u/82695288?v=4" alt="Fahad Al Belal">
+          <div class="dev-name">Fahad Al Belal</div>
+          <div class="dev-role">Backend + Frontend</div>
+        </div>
+      </div>
+      <div class="winver-footer">
+        <button class="btn" id="winver-ok-btn" style="min-width:75px">OK</button>
+      </div>
+    </div>
+  </div>
+
   <!-- SINGLE REUSABLE FLOATING POPOVER CARD -->
   <div class="profile-popover" id="profile-popover">
     <div class="popover-head">
@@ -551,11 +663,11 @@
 <!-- WINDOWS 7 TASKBAR HTML -->
 <footer class="win7-taskbar">
   <div class="taskbar-left">
-    <div class="start-orb" title="Start">
+    <div class="start-orb" title="Start" id="start-orb-btn">
       <!-- Custom PNG Icon in Start Orb -->
       <img class="start-orb-icon" src="custom-logo.png" alt="Start Logo">
     </div>
-    <div class="taskbar-items">
+    <div class="taskbar-items" id="taskbar-items-container">
       <div class="taskbar-item active" id="taskbar-app-item" title="APBn Squad Message Portal">
         <img src="group-logo.png" alt="">
         <span>APBn Squad Message Portal</span>
@@ -590,7 +702,11 @@
   const authStatus = $("auth-status"), messagesEl = $("messages");
   const input = $("message-input");
   const winEl = $("messenger-window");
+  const winverEl = $("winver-window");
   const taskbarItem = $("taskbar-app-item");
+  const startOrbBtn = $("start-orb-btn");
+  let winverTaskbarItem = null;
+
   let currentUser = null;
   let currentProfile = null;
   let replyTo = null;
@@ -621,6 +737,63 @@
     }
   }
 
+  function toggleMinimizeWinver() {
+    if (!winverTaskbarItem) return;
+    const isMin = winverEl.classList.toggle("minimized");
+    if (isMin) {
+      winverTaskbarItem.classList.remove("active");
+      winverTaskbarItem.classList.add("minimized");
+    } else {
+      winverTaskbarItem.classList.add("active");
+      winverTaskbarItem.classList.remove("minimized");
+    }
+  }
+
+  function openWinverWindow() {
+    winverEl.classList.remove("hidden");
+    winverEl.classList.remove("minimized");
+
+    // Center winver window
+    const left = Math.max(20, (window.innerWidth - 480) / 2);
+    const top = Math.max(20, (window.innerHeight - 380 - 40) / 2);
+    winverEl.style.left = `${left}px`;
+    winverEl.style.top = `${top}px`;
+
+    if (!winverTaskbarItem) {
+      winverTaskbarItem = document.createElement("div");
+      winverTaskbarItem.className = "taskbar-item active";
+      winverTaskbarItem.title = "About Windows - APBn Squad";
+      winverTaskbarItem.innerHTML = `<img src="custom-logo.png" alt=""><span>About Windows</span>`;
+      winverTaskbarItem.onclick = toggleMinimizeWinver;
+      $("taskbar-items-container").appendChild(winverTaskbarItem);
+    } else {
+      winverTaskbarItem.classList.add("active");
+      winverTaskbarItem.classList.remove("minimized");
+    }
+  }
+
+  function closeWinverWindow() {
+    winverEl.classList.add("hidden");
+    if (winverTaskbarItem) {
+      winverTaskbarItem.remove();
+      winverTaskbarItem = null;
+    }
+  }
+
+  startOrbBtn.onclick = () => {
+    if (winverEl.classList.contains("hidden")) {
+      openWinverWindow();
+    } else if (winverEl.classList.contains("minimized")) {
+      toggleMinimizeWinver();
+    } else {
+      winverEl.focus();
+    }
+  };
+
+  $("winver-min").onclick = toggleMinimizeWinver;
+  $("winver-close").onclick = closeWinverWindow;
+  $("winver-ok-btn").onclick = closeWinverWindow;
+
   function setupWindowControls() {
     $("win-min").onclick = () => toggleMinimizeWindow();
     taskbarItem.onclick = () => toggleMinimizeWindow();
@@ -628,6 +801,9 @@
     $("show-desktop").onclick = () => {
       if (!winEl.classList.contains("minimized")) {
         toggleMinimizeWindow();
+      }
+      if (winverTaskbarItem && !winverEl.classList.contains("minimized") && !winverEl.classList.contains("hidden")) {
+        toggleMinimizeWinver();
       }
     };
 
@@ -651,14 +827,13 @@
   // ================================
   // DRAGGABLE WINDOW IMPLEMENTATION
   // ================================
-  function setupDraggableWindow() {
-    const titleBar = $("app-titlebar");
+  function setupDraggableWindow(targetWin, titleBar) {
     let isDragging = false;
     let startX = 0, startY = 0;
     let initialLeft = 0, initialTop = 0;
 
     function onPointerDown(e) {
-      if (winEl.classList.contains("is-fullscreen")) return;
+      if (targetWin.classList.contains("is-fullscreen")) return;
       if (e.target.closest("button")) return;
 
       isDragging = true;
@@ -668,13 +843,13 @@
       startX = clientX;
       startY = clientY;
 
-      const rect = winEl.getBoundingClientRect();
+      const rect = targetWin.getBoundingClientRect();
       initialLeft = rect.left;
       initialTop = rect.top;
 
-      winEl.style.left = `${initialLeft}px`;
-      winEl.style.top = `${initialTop}px`;
-      winEl.style.margin = "0";
+      targetWin.style.left = `${initialLeft}px`;
+      targetWin.style.top = `${initialTop}px`;
+      targetWin.style.margin = "0";
 
       document.addEventListener("mousemove", onPointerMove);
       document.addEventListener("mouseup", onPointerUp);
@@ -695,13 +870,13 @@
       let newLeft = initialLeft + deltaX;
       let newTop = initialTop + deltaY;
 
-      const maxLeft = window.innerWidth - winEl.offsetWidth;
+      const maxLeft = window.innerWidth - targetWin.offsetWidth;
       const maxTop = window.innerHeight - 34 - 40;
       newLeft = Math.max(0, Math.min(newLeft, maxLeft));
       newTop = Math.max(0, Math.min(newTop, maxTop));
 
-      winEl.style.left = `${newLeft}px`;
-      winEl.style.top = `${newTop}px`;
+      targetWin.style.left = `${newLeft}px`;
+      targetWin.style.top = `${newTop}px`;
     }
 
     function onPointerUp() {
@@ -716,7 +891,8 @@
     titleBar.addEventListener("touchstart", onPointerDown, { passive: true });
   }
 
-  setupDraggableWindow();
+  setupDraggableWindow(winEl, $("app-titlebar"));
+  setupDraggableWindow(winverEl, $("winver-titlebar"));
 
   function authEmail(username) {
     const bytes = new TextEncoder().encode(username.trim().toLowerCase());
