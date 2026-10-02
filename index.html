@@ -88,7 +88,7 @@
       transform-origin: bottom left;
     }
 
-    /* WINDOW MINIMIZED STATE (Taskbar docking) */
+    /* WINDOW MINIMIZED STATE */
     .messenger-window.minimized {
       opacity: 0 !important;
       pointer-events: none !important;
@@ -194,7 +194,6 @@
     .msg-content-wrap{flex:1;min-width:0}
     .msg-head{display:flex;align-items:center;gap:7px;margin-bottom:2px}
     
-    /* CHAT USERNAME HOVER STYLE */
     .user-clickable{
       font-weight:bold;
       color:#144f8f;
@@ -243,7 +242,7 @@
       gap: 4px;
     }
 
-    /* WINDOWS 7 START ORB */
+    /* WINDOWS 7 START ORB (WITH CUSTOM PNG ICON) */
     .start-orb {
       width: 36px;
       height: 36px;
@@ -258,6 +257,7 @@
       transition: all 0.2s ease;
       margin-right: 6px;
       position: relative;
+      overflow: hidden;
     }
     .start-orb:hover {
       filter: brightness(1.2);
@@ -267,19 +267,12 @@
       transform: scale(0.95);
       filter: brightness(0.9);
     }
-    .start-orb-flag {
-      width: 18px;
-      height: 18px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2px;
-      transform: rotate(-8deg);
+    .start-orb-icon {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      pointer-events: none;
     }
-    .start-orb-flag div { border-radius: 1px; }
-    .start-orb-flag .f1 { background: #f25022; }
-    .start-orb-flag .f2 { background: #7fba00; }
-    .start-orb-flag .f3 { background: #00a4ef; }
-    .start-orb-flag .f4 { background: #ffb900; }
 
     /* TASKBAR BUTTON ITEM */
     .taskbar-items {
@@ -316,7 +309,6 @@
       border-color: rgba(140, 200, 255, 0.7);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 8px rgba(80, 160, 240, 0.5);
     }
-    /* Indicator glow under open apps */
     .taskbar-item::after {
       content: '';
       position: absolute;
@@ -402,7 +394,6 @@
       .status { display: none; }
       .composer textarea { font-size: 14px; }
       
-      /* HIDE TASKBAR ON MOBILE DEVICES */
       .win7-taskbar { display: none !important; }
       :root { --taskbar-height: 0px; }
     }
@@ -561,12 +552,8 @@
 <footer class="win7-taskbar">
   <div class="taskbar-left">
     <div class="start-orb" title="Start">
-      <div class="start-orb-flag">
-        <div class="f1"></div>
-        <div class="f2"></div>
-        <div class="f3"></div>
-        <div class="f4"></div>
-      </div>
+      <!-- Custom PNG Icon in Start Orb -->
+      <img class="start-orb-icon" src="custom-logo.png" alt="Start Logo">
     </div>
     <div class="taskbar-items">
       <div class="taskbar-item active" id="taskbar-app-item" title="APBn Squad Message Portal">
@@ -672,7 +659,7 @@
 
     function onPointerDown(e) {
       if (winEl.classList.contains("is-fullscreen")) return;
-      if (e.target.closest("button")) return; // Don't drag if clicking buttons
+      if (e.target.closest("button")) return;
 
       isDragging = true;
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -708,9 +695,8 @@
       let newLeft = initialLeft + deltaX;
       let newTop = initialTop + deltaY;
 
-      // Keep within viewport boundaries
       const maxLeft = window.innerWidth - winEl.offsetWidth;
-      const maxTop = window.innerHeight - 34 - 40; // keep title bar & taskbar accessible
+      const maxTop = window.innerHeight - 34 - 40;
       newLeft = Math.max(0, Math.min(newLeft, maxLeft));
       newTop = Math.max(0, Math.min(newTop, maxTop));
 
@@ -857,9 +843,6 @@
     }
   }
 
-  // ================================
-  // DIRECT TARGET FLOATING PROFILE POPOVER LOGIC
-  // ================================
   function setupProfileEvents() {
     const popover = $("profile-popover");
     const sidebarBox = $("profile-box");
@@ -880,7 +863,6 @@
       }
     });
 
-    // Hide popover on scrolling messages
     messagesEl.addEventListener("scroll", () => {
       hidePopover();
     });
@@ -934,28 +916,23 @@
 
     $("popover-edit-btn").classList.toggle("hidden", !isSelf);
 
-    // Dynamic Target Position Calculation
-    popover.style.display = "flex"; // Temporary display to compute exact box dimensions
+    popover.style.display = "flex";
     const targetRect = targetElement.getBoundingClientRect();
     const popoverRect = popover.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    // Position directly below target element
     let top = targetRect.bottom + 6;
     let left = targetRect.left;
 
-    // Flip vertically if overflowing bottom viewport
     if (top + popoverRect.height > viewportHeight - 12 - 40) {
       top = targetRect.top - popoverRect.height - 6;
     }
 
-    // Adjust horizontal position if overflowing right edge
     if (left + popoverRect.width > viewportWidth - 12) {
       left = viewportWidth - popoverRect.width - 12;
     }
 
-    // Ensure it doesn't leak out of top or left screens
     top = Math.max(10, top);
     left = Math.max(10, left);
 
@@ -1027,7 +1004,6 @@
     const avatar = currentProfile.avatar_url || "group-logo.png";
     const isAdmin = currentProfile.role === "admin";
 
-    // Sidebar Profile
     $("who").textContent = displayName;
     $("subwho").textContent = "@" + currentProfile.username;
     $("sidebar-avatar").src = avatar;
@@ -1113,7 +1089,6 @@
         </div>
       `;
 
-      // Floating Popover Events tied strictly to username & avatar elements
       const usernameEl = article.querySelector(".user-clickable");
       const avatarEl = article.querySelector(".msg-avatar");
       if (usernameEl) attachChatUserEvents(usernameEl, profile);
