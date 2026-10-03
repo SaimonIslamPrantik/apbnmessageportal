@@ -759,6 +759,10 @@
     
     <label for="edit-avatar-url">Avatar Image URL</label>
     <input id="edit-avatar-url" placeholder="https://example.com/avatar.png">
+
+    <!-- DIRECT AVATAR FILE UPLOAD OPTION -->
+    <input type="file" id="avatar-file-input" accept="image/*,.gif" class="hidden">
+    <button type="button" class="btn secondary full" id="upload-avatar-btn" style="margin-top:6px;">Upload Profile Picture (ImgBB)</button>
     
     <label for="edit-bio">Bio</label>
     <textarea id="edit-bio" rows="3" placeholder="Tell the squad about yourself..."></textarea>
@@ -1176,7 +1180,7 @@
   $("show-signup").onclick = () => switchAuth("signup");
   $("show-login").onclick = () => switchAuth("login");
 
-  // IMGBB.COM UPLOADER FUNCTION
+  // IMGBB.COM UPLOADER FUNCTION FOR CHAT COMPOSER
   const imgbbFileInput = $("imgbb-file-input");
   const uploadImageBtn = $("upload-image-btn");
 
@@ -1226,6 +1230,54 @@
       uploadImageBtn.classList.remove("uploading");
       input.placeholder = originalText;
       imgbbFileInput.value = "";
+    }
+  };
+
+  // IMGBB.COM UPLOADER FUNCTION FOR AVATAR/PROFILE PICTURE
+  const avatarFileInput = $("avatar-file-input");
+  const uploadAvatarBtn = $("upload-avatar-btn");
+
+  uploadAvatarBtn.onclick = () => {
+    avatarFileInput.click();
+  };
+
+  avatarFileInput.onchange = async () => {
+    const file = avatarFileInput.files[0];
+    if (!file) return;
+
+    if (!IMGBB_API_KEY || IMGBB_API_KEY === "YOUR_IMGBB_API_KEY") {
+      alert("Please configure a valid ImgBB API Key in the script before uploading.");
+      return;
+    }
+
+    const origBtnText = uploadAvatarBtn.textContent;
+    uploadAvatarBtn.disabled = true;
+    uploadAvatarBtn.textContent = "Uploading to ImgBB...";
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+        method: "POST",
+        body: formData
+      });
+
+      if (!res.ok) throw new Error(`ImgBB upload HTTP status: ${res.status}`);
+
+      const json = await res.json();
+      if (!json.success || !json.data || !json.data.url) {
+        throw new Error(json.error?.message || "Invalid upload response from ImgBB.");
+      }
+
+      // Populate avatar URL input field with uploaded ImgBB URL
+      $("edit-avatar-url").value = json.data.url;
+    } catch (err) {
+      alert("Failed to upload avatar to ImgBB: " + err.message);
+    } finally {
+      uploadAvatarBtn.disabled = false;
+      uploadAvatarBtn.textContent = origBtnText;
+      avatarFileInput.value = "";
     }
   };
 
