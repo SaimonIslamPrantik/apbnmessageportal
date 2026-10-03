@@ -243,15 +243,20 @@
     }
 
     /* EMBEDDED MEDIA (YOUTUBE / SPOTIFY) */
-    .chat-embed-media {
-      display: block;
-      margin-top: 6px;
-      max-width: min(480px, 100%);
-      width: 100%;
-      border-radius: 6px;
-      border: 1px solid #b2c4d6;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
+	.chat-embed-media {
+	display: block;
+	margin-top: 6px;
+	max-width: min(480px, 100%);
+	width: 100%;
+	border-radius: 6px;
+	border: 1px solid #b2c4d6;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+	}
+
+	/* Add an explicit height rule for Spotify embeds */
+	iframe[src*="spotify.com/embed"] {
+	height: 152px !important;
+	}
 
     /* MSN ENGRAVED DOWNLOAD BUTTON STYLING */
     .msn-engraved-btn {
