@@ -220,7 +220,7 @@
 
     .time{font-size:10px;color:#7a8794}.body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;color:#1b1b1b}.deleted-text{font-style:italic;color:#7b8793}.mention{color:#065db3;font-weight:bold}.reply-line{font-size:10px;color:#667787;border-left:2px solid #8fb5dc;padding-left:7px;margin-bottom:5px}.msg-tools{display:flex;justify-content:flex-end;gap:5px;margin-top:5px}.tiny{border:1px solid #9aaabd;background:linear-gradient(#fff,#e3eaf1);color:#2a4056;border-radius:2px;padding:3px 7px;font-size:10px}.tiny:hover{background:#dcecff}
     
-    /* EMBEDDED IMAGES / GIFS STYLING */
+    /* EMBEDDED IMAGES / GIFS / MYINSTANTS STYLING */
     .chat-embed-image {
       max-width: min(320px, 100%);
       max-height: 280px;
@@ -234,6 +234,12 @@
     }
     .chat-embed-image:hover {
       transform: scale(1.02);
+    }
+    .chat-embed-instant {
+      display: block;
+      margin-top: 6px;
+      border-radius: 4px;
+      overflow: hidden;
     }
 
     /* COMPOSER & IMAGE ICON STYLING */
@@ -1151,10 +1157,17 @@
     return clean.trim();
   }
 
-  // EXTENDED TEXT FORMATTER TO AUTO-EMBED DIRECT IMAGE / GIF URLS
+  // EXTENDED TEXT FORMATTER TO AUTO-EMBED MYINSTANTS & DIRECT IMAGE / GIF URLS
   function formatText(s) {
     let safe = escapeHTML(s);
     
+    // Auto-detect and embed MyInstants links
+    const myinstantsRegex = /https?:\/\/(?:www\.)?myinstants\.com\/(?:[a-z]{2}\/)?instant\/([a-zA-Z0-9-]+)\/?[^\s]*/gi;
+    safe = safe.replace(myinstantsRegex, (match, instantSlug) => {
+      const embedUrl = `https://www.myinstants.com/instant/${instantSlug}/embed/`;
+      return `<br><iframe class="chat-embed-instant" width="110" height="200" src="${embedUrl}" frameborder="0" scrolling="no"></iframe>`;
+    });
+
     // Auto-detect and render direct image or GIF links (including ibb.co or i.ibb.co images)
     const imageRegex = /(https?:\/\/[^\s]+?\.(?:png|jpe?g|gif|webp|bmp))/gi;
     safe = safe.replace(imageRegex, (match) => {
