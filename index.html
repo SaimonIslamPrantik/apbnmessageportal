@@ -242,6 +242,75 @@
       overflow: hidden;
     }
 
+    /* EMBEDDED MEDIA (YOUTUBE / SPOTIFY) */
+    .chat-embed-media {
+      display: block;
+      margin-top: 6px;
+      max-width: min(480px, 100%);
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #b2c4d6;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    /* MSN ENGRAVED DOWNLOAD BUTTON STYLING */
+    .msn-engraved-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      margin-top: 6px;
+      font-family: "Tahoma", "Segoe UI", sans-serif;
+      font-size: 13px;
+      font-weight: bold;
+      color: #38597a;
+      text-decoration: none;
+      
+      background: 
+        linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.1) 48%, rgba(200, 222, 245, 0.3) 50%, rgba(220, 235, 250, 0.6) 100%),
+        linear-gradient(135deg, #ffffff 0%, #ffffff 45%, #dcebfa 46%, #bad3ed 100%);
+
+      border: 1px solid #7c9dc2;
+      border-top-color: #6183a9;
+      border-left-color: #6183a9;
+      border-radius: 4px;
+      
+      box-shadow: 
+        inset 1px 1px 2px rgba(40, 75, 115, 0.35),
+        0px 1px 0px #ffffff;
+        
+      text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.8);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.05s ease;
+    }
+
+    .msn-engraved-btn:hover {
+      color: #1e395b;
+      border-color: #4b7bb2;
+      background: linear-gradient(135deg, #ffffff 0%, #ffffff 45%, #cde1f7 46%, #adcde8 100%);
+      box-shadow: 
+        inset 1px 1px 2px rgba(30, 60, 95, 0.45),
+        0px 1px 0px #ffffff;
+    }
+
+    .msn-engraved-btn:active {
+      padding: 7px 13px 5px 15px;
+      background: linear-gradient(135deg, #c3daee 0%, #b3cef0 45%, #a2c2e5 46%, #91b5dc 100%);
+      box-shadow: 
+        inset 1px 1px 3px rgba(10, 35, 65, 0.6),
+        0px 1px 0px #ffffff;
+    }
+
+    .msn-icon-dl {
+      width: 12px;
+      height: 12px;
+      display: inline-block;
+      background-color: #2b9e3a;
+      clip-path: polygon(35% 0%, 65% 0%, 65% 45%, 100% 45%, 50% 100%, 0% 45%, 35% 45%);
+      filter: drop-shadow(0px 1px 0px rgba(255, 255, 255, 0.7));
+    }
+
     /* COMPOSER & IMAGE ICON STYLING */
     #composer-wrap{padding:7px 10px 9px;background:linear-gradient(#edf4fb,#d7e6f4);border-top:1px solid #a7b8ca}.reply-banner{max-width:none;margin:0 0 5px;background:#fff7cf;border:1px solid #dfca79;padding:5px 8px;border-radius:2px;font-size:10px;color:#655522;display:flex;justify-content:space-between}.composer{display:flex;gap:6px;align-items:flex-end}
     .composer textarea{flex:1;min-height:42px;max-height:100px}
@@ -1157,10 +1226,28 @@
     return clean.trim();
   }
 
-  // EXTENDED TEXT FORMATTER TO AUTO-EMBED MYINSTANTS & DIRECT IMAGE / GIF URLS
+  // EXTENDED TEXT FORMATTER WITH YOUTUBE, SPOTIFY, CATBOX, MYINSTANTS & IMAGE EMBEDS
   function formatText(s) {
     let safe = escapeHTML(s);
     
+    // Auto-detect and embed Youtube links
+    const youtubeRegex = /https?:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})[^\s]*/gi;
+    safe = safe.replace(youtubeRegex, (match, videoId) => {
+      return `<br><iframe class="chat-embed-media" height="240" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    });
+
+    // Auto-detect and embed Spotify links
+    const spotifyRegex = /https?:\/\/open\.spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)[^\s]*/gi;
+    safe = safe.replace(spotifyRegex, (match, type, id) => {
+      return `<br><iframe class="chat-embed-media" src="https://open.spotify.com/embed/${type}/${id}" height="152" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>`;
+    });
+
+    // Auto-detect files.catbox.moe links and replace with MSN Engraved Download Button
+    const catboxRegex = /(https?:\/\/files\.catbox\.moe\/[a-zA-Z0-9._-]+)/gi;
+    safe = safe.replace(catboxRegex, (match) => {
+      return `<br><a href="${match}" target="_blank" rel="noopener noreferrer" class="msn-engraved-btn"><span class="msn-icon-dl"></span><span>Download</span></a>`;
+    });
+
     // Auto-detect and embed MyInstants links
     const myinstantsRegex = /https?:\/\/(?:www\.)?myinstants\.com\/(?:[a-z]{2}\/)?instant\/([a-zA-Z0-9-]+)\/?[^\s]*/gi;
     safe = safe.replace(myinstantsRegex, (match, instantSlug) => {
@@ -1944,10 +2031,21 @@
   $("delete-account-btn").onclick = deleteAccount;
   $("close-admin").onclick = () => $("admin-modal").classList.add("hidden");
 
+  // UPDATED KEYDOWN LISTENER: Enter always inserts new line on mobile/touch screens
   input.addEventListener("keydown", e => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    if (e.key === "Enter") {
+      if (isMobile) {
+        // Allow default behavior (adds newline) on touch/mobile devices
+        return;
+      } else {
+        // Desktop PC behavior: Shift+Enter = new line, Enter alone = send
+        if (!e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      }
     }
   });
 
