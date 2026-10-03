@@ -133,6 +133,18 @@
     .workspace{flex:1;min-height:0;display:flex;background:#fff;overflow:hidden;position:relative}
     .sidebar{width:230px;flex:0 0 230px;background:linear-gradient(90deg,#eaf3fc,#d8e8f8);border-right:1px solid #9cafc3;padding:9px;display:flex;flex-direction:column;overflow-y:auto;position:relative}
 
+    /* Mobile toggle button inside toolbar */
+    .mobile-profile-toggle {
+      display: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid #91a6ba;
+      object-fit: cover;
+      cursor: pointer;
+      background: #fff;
+    }
+
     .profile-box{
       display:flex;
       gap:8px;
@@ -528,17 +540,57 @@
       opacity: 1;
     }
 
+    /* MOBILE OVERLAY FOR SIDEBAR */
+    .mobile-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 99;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
     @media (max-width: 768px) {
       body { overflow: hidden; }
       .screen { padding: 0; }
       #app { padding: 0 !important; height: 100vh !important; height: 100dvh !important; }
       .messenger-window { width: 100vw !important; height: 100vh !important; height: 100dvh !important; border-radius: 0 !important; border: none !important; top:0 !important; left:0 !important; }
-      .sidebar { width: 140px; flex: 0 0 140px; padding: 6px; }
-      .profile-box { padding: 4px; gap: 4px; }
-      .profile-avatar { width: 32px; height: 32px; }
+      
+      /* Mobile Collapsible Side Panel */
+      .sidebar {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 210px;
+        flex: none;
+        z-index: 100;
+        box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+        transform: translateX(-100%);
+        transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+        padding: 9px;
+      }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      .mobile-overlay.show {
+        display: block;
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .mobile-profile-toggle {
+        display: block;
+        margin-right: 4px;
+      }
+
+      .profile-box { padding: 6px; gap: 6px; }
+      .profile-avatar { width: 36px; height: 36px; }
       .profile-popover { width: 220px; }
       .rules { display: none; }
-      .toolbar { overflow-x: auto; padding: 2px 4px; }
+      .toolbar { overflow-x: auto; padding: 2px 6px; gap: 4px; }
       .toolbar .btn { padding: 5px 8px; font-size: 11px; }
       .status { display: none; }
       .composer textarea { font-size: 14px; }
@@ -605,12 +657,14 @@
       </div>
     </div>
     <div class="toolbar">
+      <img id="mobile-profile-toggle" class="mobile-profile-toggle" src="group-logo.png" title="Toggle Side Panel" alt="Profile Button">
       <button class="btn secondary" id="settings-toolbar">Settings</button>
       <button class="btn secondary" id="admin-btn">Admin</button>
       <div class="sep"></div><div class="status"><span class="status-dot"></span>Online</div>
     </div>
     <div class="workspace">
-      <aside class="sidebar">
+      <div id="mobile-overlay" class="mobile-overlay"></div>
+      <aside class="sidebar" id="sidebar">
         <div class="profile-box" id="profile-box">
           <img class="profile-avatar" id="sidebar-avatar" src="group-logo.png" alt="">
           <div style="min-width:0;flex:1">
@@ -802,6 +856,26 @@
   let swRegistration = null;
 
   const usernameRegex = /^[A-Za-z]+@[0-9]+$/;
+
+  // Mobile Side Panel Controls
+  const sidebarEl = $("sidebar");
+  const mobileProfileToggleBtn = $("mobile-profile-toggle");
+  const mobileOverlayEl = $("mobile-overlay");
+
+  function toggleMobileSidebar(show) {
+    const shouldShow = show !== undefined ? show : !sidebarEl.classList.contains("mobile-open");
+    sidebarEl.classList.toggle("mobile-open", shouldShow);
+    mobileOverlayEl.classList.toggle("show", shouldShow);
+  }
+
+  mobileProfileToggleBtn.onclick = (e) => {
+    e.stopPropagation();
+    toggleMobileSidebar();
+  };
+
+  mobileOverlayEl.onclick = () => {
+    toggleMobileSidebar(false);
+  };
 
   // Audio Synthesizer Beep
   let audioCtx = null;
@@ -1114,7 +1188,6 @@
       statusMsg.textContent = "Notifications active on desktop and mobile.";
     }
 
-    // Mobile browsers only allow the permission prompt after a tap, so ask on the first tap
     if (isEnabled && Notification.permission === "default" && !initNotificationSettings.armed) {
       initNotificationSettings.armed = true;
       statusMsg.textContent = "Tap anywhere once to allow notifications.";
@@ -1190,7 +1263,6 @@
         vibrate: [200, 100, 200]
       };
 
-      // 1. Service Worker notification (the only method mobile browsers allow; works on desktop too)
       try {
         let reg = swRegistration;
         if (!reg && "serviceWorker" in navigator) {
@@ -1207,7 +1279,6 @@
         console.warn("Service Worker notification failed:", e);
       }
 
-      // 2. Standard Web Notification (desktop fallback)
       try {
         const notif = new Notification(title, options);
         notif.onclick = () => {
@@ -1221,7 +1292,6 @@
       }
     }
 
-    // 3. Fallback: Show In-App Floating Toast Banner
     showInAppToast(cleanSender, truncatedBody);
   }
 
@@ -1463,6 +1533,7 @@
     $("who").textContent = displayName;
     $("subwho").textContent = "@" + currentProfile.username;
     $("sidebar-avatar").src = avatar;
+    $("mobile-profile-toggle").src = avatar;
 
     $("admin-btn").classList.toggle("hidden", !isAdmin);
   }
